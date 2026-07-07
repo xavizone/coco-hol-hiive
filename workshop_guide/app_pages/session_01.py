@@ -57,7 +57,7 @@ Execute all SQL."""
 st.markdown("""
 **Before running the prompt below, download the 10 CSV files and upload them to the `DATA` stage:**
 
-1. Download all files from [github.com/sfc-gh-snotebaert/coco-hol-montreal/tree/main/workshop_guide/data](https://github.com/sfc-gh-snotebaert/coco-hol-montreal/tree/main/workshop_guide/data):
+1. Download all files from [github.com/xavizone/coco-hol-hiive/tree/main/workshop_guide/data](https://github.com/xavizone/coco-hol-hiive/tree/main/workshop_guide/data):
    `companies.csv`, `shareholders.csv`, `listings.csv`, `trade_executions.csv`, `pricing_signals.csv`, `platform_activity.csv`, `user_sessions.csv`, `compliance_reviews.csv`, `support_tickets.csv`, `regulatory_filings.csv`
 2. Using Snowsight, use the Horizon Catalog to browse to the `HIIVE_AI.MARKETPLACE_OPS.DATA` stage to upload all 10 files.
 3. Then copy the prompt below into Cortex Code and execute.

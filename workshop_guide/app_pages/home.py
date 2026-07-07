@@ -1,6 +1,6 @@
 import streamlit as st
 
-st.title("HIIVE Data Intelligence Workshop")
+st.title("HIIVE Snowflake CoCo Workshop")
 st.markdown("From Reactive Monitoring to Proactive Data Intelligence with Snowflake")
 
 st.space("small")
@@ -70,7 +70,7 @@ st.space("small")
 st.markdown("#### Prerequisites")
 with st.container(border=True):
     st.markdown("""
-- Snowflake account with **ACCOUNTADMIN** role (you already have access — confirm role permissions)
+- Your own dev/Sandbox Snowflake account or a Trial Snowflake account with **ACCOUNTADMIN** role [**Snowflake Trial** Account](signup.snowflake.com);
 - **Cortex Code** open in Snowsight and connected to your account
 - Cross-region inference enabled (for Cortex LLM functions)
 """)
