@@ -16,7 +16,7 @@ with st.container(border=True):
     st.markdown("""
 In Snowsight, click **CoWork** in the left navigation panel. Start a new conversation.
 
-CoWork provides a chat-based interface that can query your Snowflake data, create charts, and generate insights — no SQL required. It discovers your tables in `PORT_MTL_AI.PORT_OPS` automatically.
+CoWork provides a chat-based interface that can query your Snowflake data, create charts, and generate insights — no SQL required. It discovers your tables in `HIIVE_AI.MARKETPLACE_OPS` automatically.
 
 Paste each question below into CoWork one at a time and observe how it generates queries and visualizations.
 """)
@@ -27,13 +27,13 @@ st.markdown("#### :material/chat: Questions to ask CoWork")
 st.caption("Copy and paste each question into CoWork individually. They build on each other in sequence.")
 
 questions = [
-    ("1. Operations Overview", "Show me an overview of the Port of Montreal operations — how many containers have we processed, what's our busiest terminal, and what's the average truck wait time?"),
-    ("2. Seasonal Patterns", "Create a visualization showing TEU volume by terminal and month. Are there seasonal patterns?"),
-    ("3. Safety Concerns", "What are the top safety concerns at the port based on incident data? Show me a breakdown by category and severity."),
-    ("4. Crane Efficiency", "Compare the crane utilization rates across terminals. Which terminals are operating most efficiently?"),
-    ("5. Correlation Analysis", "Based on the incident data and crane utilization patterns, are there any terminals that seem to have both high utilization AND more safety incidents? Could overworked equipment be a factor?"),
-    ("6. Executive Summary", "Generate a summary report of port operations health that I could share with the port authority board. Include key metrics, trends, and areas of concern."),
-    ("7. Recommendations", "What would you recommend as the top 3 operational improvements based on all the data you can see?"),
+    ("1. Marketplace Overview", "Show me an overview of HIIVE marketplace activity — total trades executed, top company by volume, and average time to settlement"),
+    ("2. Sector Trends", "Create a visualization showing trade volume by company sector and month. Are there seasonal patterns?"),
+    ("3. Compliance Concerns", "What are the top compliance concerns based on review data? Show breakdown by type and risk score"),
+    ("4. User Engagement", "Compare platform engagement metrics across user types (buyers vs sellers). Who is more active?"),
+    ("5. Correlation Analysis", "Based on compliance reviews and trading patterns, are there companies that have both high volume AND more compliance flags?"),
+    ("6. Executive Summary", "Generate a summary report of marketplace health that I could share with the executive team. Include key metrics, trends, and areas of concern."),
+    ("7. Recommendations", "What would you recommend as the top 3 operational improvements based on all the data?"),
 ]
 
 for title, question in questions:
@@ -51,7 +51,7 @@ render_explanation("How CoWork works", """
 - **CoWork**: Analyst tool — explores data, generates visualizations, shares insights
 
 **What CoWork does with these questions**:
-1. Queries your tables automatically (it discovers PORT_MTL_AI.PORT_OPS tables)
+1. Queries your tables automatically (it discovers HIIVE_AI.MARKETPLACE_OPS tables)
 2. Generates appropriate SQL behind the scenes
 3. Creates visualizations (charts, tables) inline
 4. Provides natural language explanations of the results
@@ -74,12 +74,12 @@ render_explanation("How CoWork works", """
 render_key_concepts([
     {"term": "CoWork", "definition": "Snowflake's collaborative AI workspace for data exploration. Provides a conversational interface that queries data, creates visualizations, and generates insights. Designed for business analysts and team collaboration."},
     {"term": "Collaborative Intelligence", "definition": "The pattern where AI assists a team in making decisions together. CoWork sessions can be shared, allowing multiple people to ask questions, build on each other's analysis, and reach conclusions collectively."},
-    {"term": "Context Maintenance", "definition": "CoWork maintains conversation history so follow-up questions build on previous analysis. Ask 'Show me TEU by terminal' then 'Now filter to just peak months' — it remembers the context."},
+    {"term": "Context Maintenance", "definition": "CoWork maintains conversation history so follow-up questions build on previous analysis. Ask 'Show me trade volume by sector' then 'Now filter to just Q4' — it remembers the context."},
 ])
 
 render_what_you_built([
-    "Explored port operations data through conversational AI",
-    "Generated visualizations and cross-table analysis",
-    "Created an executive summary of port operations health",
+    "Explored HIIVE marketplace data through conversational AI",
+    "Generated visualizations of trading patterns and compliance data",
+    "Created an executive summary of marketplace health",
     "Demonstrated the CoWork collaborative analysis pattern",
 ])

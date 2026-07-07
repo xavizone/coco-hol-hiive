@@ -1,7 +1,7 @@
 import streamlit as st
 from components import render_session_header, render_prompt, render_explanation, render_technologies_used, render_key_concepts, render_what_you_built
 
-render_session_header(3, "Cortex Search", "9:55 - 10:20 AM", "25 min", "Knowledge base, Cortex Search service, and RAG query pattern")
+render_session_header(3, "Cortex Search", "10:55 - 11:20 AM", "25 min", "Knowledge base, Cortex Search service, and RAG query pattern")
 
 render_technologies_used([
     {"name": "Cortex Search Service", "description": "A managed hybrid search engine combining vector (semantic) and keyword search with automatic reranking. Created with a single SQL statement; handles embedding, indexing, and serving automatically.", "icon": "search"},
@@ -10,23 +10,23 @@ render_technologies_used([
 ])
 
 
-PROMPT_3_1 = """In PORT_MTL_AI.PORT_OPS:
+PROMPT_3_1 = """In HIIVE_AI.MARKETPLACE_OPS:
 
-1. First, create a unified text table for search called PORT_KNOWLEDGE_BASE that combines:
-   - PORT_INCIDENT_LOGS: incident_id as doc_id, 'incident_log' as doc_type, description_text || ' Resolution: ' || resolution_text as content, category as metadata_category, severity as metadata_priority, incident_date as doc_date
-   - MARINE_SAFETY_REPORTS: report_id as doc_id, 'safety_report' as doc_type, report_text || ' Recommended: ' || recommended_actions as content, report_type as metadata_category, status as metadata_priority, report_date as doc_date
-   - CBSA_INSPECTION_REPORTS: report_id as doc_id, 'inspection_report' as doc_type, findings_text as content, inspection_type as metadata_category, outcome as metadata_priority, inspection_date as doc_date
+1. First, create a unified text table for search called MARKETPLACE_KNOWLEDGE_BASE that combines:
+   - COMPLIANCE_REVIEWS: review_id as doc_id, 'compliance_review' as doc_type, findings_text as content, review_type as metadata_category, outcome as metadata_priority, review_date as doc_date
+   - SUPPORT_TICKETS: ticket_id as doc_id, 'support_ticket' as doc_type, description_text || ' Resolution: ' || resolution_text as content, category as metadata_category, priority as metadata_priority, created_date as doc_date
+   - REGULATORY_FILINGS: filing_id as doc_id, 'regulatory_filing' as doc_type, summary_text || ' Reviewer Notes: ' || reviewer_notes as content, filing_type as metadata_category, status as metadata_priority, filing_date as doc_date
 
 2. Then create a Cortex Search Service:
-   CREATE OR REPLACE CORTEX SEARCH SERVICE port_knowledge_search
+   CREATE OR REPLACE CORTEX SEARCH SERVICE marketplace_knowledge_search
      ON content
      ATTRIBUTES metadata_category, metadata_priority, doc_type
-     WAREHOUSE = PORT_MTL_WH
+     WAREHOUSE = HIIVE_WH
      TARGET_LAG = '1 hour'
      EMBEDDING_MODEL = 'snowflake-arctic-embed-l-v2.0'
      AS (
        SELECT doc_id, doc_type, content, metadata_category, metadata_priority, doc_date
-       FROM PORT_KNOWLEDGE_BASE
+       FROM MARKETPLACE_KNOWLEDGE_BASE
      );
 
 Execute all SQL. Then verify the service is created by running SHOW CORTEX SEARCH SERVICES."""
@@ -36,10 +36,10 @@ render_prompt("Prompt 3.1", "Create Cortex Search Service", PROMPT_3_1)
 render_explanation("What this prompt does", """
 Two major steps: building a unified knowledge base and creating a search service.
 
-**Step 1 — PORT_KNOWLEDGE_BASE**: A UNION ALL table combining three document sources into a common schema:
-- `doc_type` enables filtering by source (incidents vs. safety vs. inspections)
+**Step 1 — MARKETPLACE_KNOWLEDGE_BASE**: A UNION ALL table combining three document sources into a common schema:
+- `doc_type` enables filtering by source (compliance vs. support vs. regulatory)
 - `metadata_category` and `metadata_priority` become filter attributes
-- Content is concatenated (description + resolution) for full context
+- Content is concatenated (description + resolution, summary + notes) for full context
 
 **Step 2 — CREATE CORTEX SEARCH SERVICE**: This single SQL statement:
 
@@ -56,17 +56,17 @@ Two major steps: building a unified knowledge base and creating a search service
 """)
 
 
-PROMPT_3_2 = """In PORT_MTL_AI.PORT_OPS, query our port_knowledge_search service using SEARCH_PREVIEW with these searches:
+PROMPT_3_2 = """In HIIVE_AI.MARKETPLACE_OPS, query our marketplace_knowledge_search service using SEARCH_PREVIEW with these searches:
 
-1. Search: "equipment failure crane" - show top 3 results
-2. Search: "oil spill environmental pollution" - show top 3 results
-3. Search: "customs cargo discrepancy" filtered to doc_type = 'inspection_report' - show top 3 results
-4. Search: "winter storm ice delay" - show top 3 results
+1. Search: "KYC verification failure" - show top 3 results
+2. Search: "transfer delay settlement" - show top 3 results
+3. Search: "SEC filing Form D" filtered to doc_type = 'regulatory_filing' - show top 3 results
+4. Search: "accredited investor qualification" - show top 3 results
 
 Use this pattern for each:
 SELECT PARSE_JSON(
   SNOWFLAKE.CORTEX.SEARCH_PREVIEW(
-    'PORT_MTL_AI.PORT_OPS.port_knowledge_search',
+    'HIIVE_AI.MARKETPLACE_OPS.marketplace_knowledge_search',
     '{
       "query": "<search_query>",
       "columns": ["doc_id", "doc_type", "content", "metadata_category"],
@@ -82,40 +82,40 @@ render_prompt("Prompt 3.2", "Query the Search Service", PROMPT_3_2)
 render_explanation("What this prompt does", """
 Four search queries demonstrating different capabilities:
 
-1. **"equipment failure crane"** — Tests keyword + semantic overlap. Should find crane malfunction incidents even if they don't use the exact word "failure."
+1. **"KYC verification failure"** — Tests keyword + semantic overlap. Should find compliance reviews related to identity verification even if they use terms like "identity check" or "accreditation denial."
 
-2. **"oil spill environmental pollution"** — Tests semantic search. Should find pollution incidents that describe "sheen," "contamination," or "discharge" without using "spill."
+2. **"transfer delay settlement"** — Tests semantic search. Should find support tickets about trade settlement issues, share transfer delays, or ROFR processing time without needing exact term matches.
 
-3. **"customs cargo discrepancy" with filter** — Tests **attribute filtering**:
+3. **"SEC filing Form D" with filter** — Tests **attribute filtering**:
 ```json
 {
-  "query": "customs cargo discrepancy",
+  "query": "SEC filing Form D",
   "columns": ["doc_id", "doc_type", "content"],
-  "filter": {"@eq": {"doc_type": "inspection_report"}},
+  "filter": {"@eq": {"doc_type": "regulatory_filing"}},
   "limit": 3
 }
 ```
 
-4. **"winter storm ice delay"** — Tests seasonal/weather concept matching across incident logs and safety reports.
+4. **"accredited investor qualification"** — Tests cross-document concept matching across compliance reviews and support tickets related to investor accreditation.
 
-**Why hybrid search matters**: Pure keyword search misses synonyms ("spill" vs "discharge"). Pure vector search can return semantically similar but factually irrelevant results. Cortex Search combines both with reranking.
+**Why hybrid search matters**: Pure keyword search misses synonyms ("KYC" vs "identity verification"). Pure vector search can return semantically similar but factually irrelevant results. Cortex Search combines both with reranking.
 """)
 
 
-PROMPT_3_3 = """In PORT_MTL_AI.PORT_OPS, implement a RAG pattern that:
+PROMPT_3_3 = """In HIIVE_AI.MARKETPLACE_OPS, implement a RAG pattern that:
 
-1. Takes a user question: "What are the most common safety incidents at Port of Montreal terminals and what preventive measures have been effective?"
+1. Takes a user question: "What are the most common compliance issues on the HIIVE platform and what preventive measures have been effective?"
 
-2. First retrieves the top 5 most relevant documents from port_knowledge_search using SEARCH_PREVIEW
+2. First retrieves the top 5 most relevant documents from marketplace_knowledge_search using SEARCH_PREVIEW
 
 3. Then passes the retrieved context + question to SNOWFLAKE.CORTEX.COMPLETE() to generate a grounded answer:
 
 WITH search_results AS (
     SELECT PARSE_JSON(
         SNOWFLAKE.CORTEX.SEARCH_PREVIEW(
-            'PORT_MTL_AI.PORT_OPS.port_knowledge_search',
+            'HIIVE_AI.MARKETPLACE_OPS.marketplace_knowledge_search',
             '{
-                "query": "common safety incidents terminals preventive measures",
+                "query": "common compliance issues preventive measures effectiveness",
                 "columns": ["doc_id", "doc_type", "content", "metadata_category"],
                 "limit": 5
             }'
@@ -128,14 +128,14 @@ context AS (
 )
 SELECT SNOWFLAKE.CORTEX.COMPLETE(
     'claude-sonnet-4-6',
-    'You are a port safety expert at the Port of Montreal. Based ONLY on the following source documents, answer the user question. Cite specific incidents by their doc_id when referencing findings. If the documents do not contain enough information, say so.
+    'You are a compliance expert at HIIVE, a private securities marketplace for pre-IPO secondary trading. Based ONLY on the following source documents, answer the user question. Cite specific documents by their doc_id when referencing findings. If the documents do not contain enough information, say so.
 
 SOURCE DOCUMENTS:
 ' || combined_context || '
 
-USER QUESTION: What are the most common safety incidents at Port of Montreal terminals and what preventive measures have been effective?
+USER QUESTION: What are the most common compliance issues on the HIIVE platform and what preventive measures have been effective?
 
-Provide a structured answer with: 1) Common incident types, 2) Root causes, 3) Effective preventive measures, 4) Recommendations.'
+Provide a structured answer with: 1) Common compliance issues, 2) Root causes, 3) Effective preventive measures, 4) Recommendations.'
 ) AS rag_response
 FROM context;
 
@@ -168,9 +168,9 @@ User Question
 
 **Why RAG works better than raw LLM**:
 - **Reduces hallucination**: LLM answers "ONLY" from provided documents
-- **Provides citations**: "Cite specific incidents by doc_id" enables traceability
+- **Provides citations**: "Cite specific documents by doc_id" enables traceability
 - **Fresh data**: Search service reflects latest data; LLM knowledge is static
-- **Domain-specific**: Your enterprise data isn't in the LLM's training set
+- **Domain-specific**: Your enterprise compliance and regulatory data isn't in the LLM's training set
 """)
 
 
@@ -182,8 +182,8 @@ render_key_concepts([
 ])
 
 render_what_you_built([
-    "PORT_KNOWLEDGE_BASE — unified document table from 3 sources (85 documents)",
-    "port_knowledge_search — Cortex Search service with hybrid search",
+    "MARKETPLACE_KNOWLEDGE_BASE — unified document table from 3 sources (175 documents)",
+    "marketplace_knowledge_search — Cortex Search service with hybrid search",
     "4 search queries demonstrating keyword, semantic, and filtered search",
     "Full RAG pipeline: retrieve + augment + generate in a single SQL query",
 ])

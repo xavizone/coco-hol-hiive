@@ -1,7 +1,7 @@
 import streamlit as st
 from components import render_session_header, render_prompt, render_explanation, render_technologies_used, render_key_concepts, render_what_you_built
 
-render_session_header(1, "Data Prep", "9:00 - 9:25 AM", "25 min", "Database, schema, warehouse, and 10 operational tables loaded from CSV")
+render_session_header(1, "Data Prep", "10:00 - 10:25 AM", "25 min", "Database, schema, warehouse, and 10 marketplace tables loaded from CSV")
 
 render_technologies_used([
     {"name": "Database & Schema", "description": "Snowflake's organizational hierarchy for objects. A database contains schemas, and schemas contain tables, views, and other objects.", "icon": "database"},
@@ -10,12 +10,12 @@ render_technologies_used([
 ])
 
 
-PROMPT_1_1 = """Create the following Snowflake objects for our Port of Montreal AI workshop:
+PROMPT_1_1 = """Create the following Snowflake objects for our HIIVE AI workshop:
 
-1. A database called PORT_MTL_AI
-2. A schema called PORT_OPS inside that database
-3. A stage called DATA in the schema PORT_OPS with a directory table and server side encryption
-3. A warehouse called PORT_MTL_WH (size MEDIUM, auto-suspend after 60 seconds, auto-resume enabled)
+1. A database called HIIVE_AI
+2. A schema called MARKETPLACE_OPS inside that database
+3. A stage called DATA in the schema MARKETPLACE_OPS with a directory table and server side encryption
+3. A warehouse called HIIVE_WH (size MEDIUM, auto-suspend after 60 seconds, auto-resume enabled)
 4. Set the session context to use these objects
 
 Execute all SQL and confirm each object was created."""
@@ -26,25 +26,25 @@ render_explanation("What this prompt does", """
 Creates the foundational Snowflake objects:
 
 ```sql
-CREATE DATABASE PORT_MTL_AI;
-CREATE SCHEMA PORT_MTL_AI.PORT_OPS;
-CREATE WAREHOUSE PORT_MTL_WH
+CREATE DATABASE HIIVE_AI;
+CREATE SCHEMA HIIVE_AI.MARKETPLACE_OPS;
+CREATE WAREHOUSE HIIVE_WH
   WAREHOUSE_SIZE = 'MEDIUM'
   AUTO_SUSPEND = 60
   AUTO_RESUME = TRUE;
 
-USE DATABASE PORT_MTL_AI;
-USE SCHEMA PORT_OPS;
-USE WAREHOUSE PORT_MTL_WH;
+USE DATABASE HIIVE_AI;
+USE SCHEMA MARKETPLACE_OPS;
+USE WAREHOUSE HIIVE_WH;
 ```
 
-**Why MEDIUM?** We're loading ~1,500 rows total — even X-SMALL would work. MEDIUM gives us comfortable headroom for the Cortex functions we'll use later. With AUTO_SUSPEND = 60 seconds, it will pause immediately after queries finish, minimizing credit usage.
+**Why MEDIUM?** We're loading ~1,460 rows total — even X-SMALL would work. MEDIUM gives us comfortable headroom for the Cortex functions we'll use later. With AUTO_SUSPEND = 60 seconds, it will pause immediately after queries finish, minimizing credit usage.
 """)
 
 
-PROMPT_1_2 = """In PORT_MTL_AI.PORT_OPS, the 10 CSV files have been uploaded to an internal stage called DATA.
+PROMPT_1_2 = """In HIIVE_AI.MARKETPLACE_OPS, the 10 CSV files have been uploaded to an internal stage called DATA.
 
-For all 10 tables (TERMINALS, VESSELS, CONTAINER_MANIFESTS, CARGO_INVOICES, RAIL_SCHEDULES, CRANE_UTILIZATION, TRUCK_QUEUE_TIMES, PORT_INCIDENT_LOGS, MARINE_SAFETY_REPORTS, CBSA_INSPECTION_REPORTS):
+For all 10 tables (COMPANIES, SHAREHOLDERS, LISTINGS, TRADE_EXECUTIONS, PRICING_SIGNALS, PLATFORM_ACTIVITY, USER_SESSIONS, COMPLIANCE_REVIEWS, SUPPORT_TICKETS, REGULATORY_FILINGS):
 
 1. Create a file format (CSV with PARSE_HEADER=TRUE, FIELD_OPTIONALLY_ENCLOSED_BY='"')
 2. Create the tables with appropriate column types inferred from the data. Ensure to convert the column names to uppercase.
@@ -58,15 +58,15 @@ st.markdown("""
 **Before running the prompt below, download the 10 CSV files and upload them to the `DATA` stage:**
 
 1. Download all files from [github.com/sfc-gh-snotebaert/coco-hol-montreal/tree/main/workshop_guide/data](https://github.com/sfc-gh-snotebaert/coco-hol-montreal/tree/main/workshop_guide/data):
-   `terminals.csv`, `vessels.csv`, `container_manifests.csv`, `cargo_invoices.csv`, `rail_schedules.csv`, `crane_utilization.csv`, `truck_queue_times.csv`, `port_incident_logs.csv`, `marine_safety_reports.csv`, `cbsa_inspection_reports.csv`
-2. Using Snowsight, use the Horizon Catalog to browse to the `PORT_MTL_AI.PORT_OPS.DATA` stage to upload all 10 files.
+   `companies.csv`, `shareholders.csv`, `listings.csv`, `trade_executions.csv`, `pricing_signals.csv`, `platform_activity.csv`, `user_sessions.csv`, `compliance_reviews.csv`, `support_tickets.csv`, `regulatory_filings.csv`
+2. Using Snowsight, use the Horizon Catalog to browse to the `HIIVE_AI.MARKETPLACE_OPS.DATA` stage to upload all 10 files.
 3. Then copy the prompt below into Cortex Code and execute.
 """)
 
 render_prompt("Prompt 1.2", "Load and Create Tables from CSV", PROMPT_1_2)
 
 render_explanation("What this prompt does", """
-Loads all 10 operational data tables from CSV files uploaded to the internal stage `DATA`. Cortex Code will use INFER_SCHEMA to detect column types automatically:
+Loads all 10 marketplace data tables from CSV files uploaded to the internal stage `DATA`. Cortex Code will use INFER_SCHEMA to detect column types automatically:
 
 ```sql
 CREATE OR REPLACE FILE FORMAT csv_format
@@ -74,37 +74,37 @@ CREATE OR REPLACE FILE FORMAT csv_format
   PARSE_HEADER = TRUE
   FIELD_OPTIONALLY_ENCLOSED_BY = '"';
 
-CREATE OR REPLACE TABLE TERMINALS
+CREATE OR REPLACE TABLE COMPANIES
   USING TEMPLATE (
     SELECT ARRAY_AGG(OBJECT_CONSTRUCT(*))
     FROM TABLE(INFER_SCHEMA(
-      LOCATION => '@PORT_MTL_AI.PORT_OPS.DATA/terminals.csv',
+      LOCATION => '@HIIVE_AI.MARKETPLACE_OPS.DATA/companies.csv',
       FILE_FORMAT => 'csv_format'
     ))
   );
 
-COPY INTO TERMINALS
-  FROM @PORT_MTL_AI.PORT_OPS.DATA/terminals.csv
+COPY INTO COMPANIES
+  FROM @HIIVE_AI.MARKETPLACE_OPS.DATA/companies.csv
   FILE_FORMAT = csv_format;
 ```
 
 **The 10 tables**:
 | Table | Rows | Description |
 |-------|------|-------------|
-| TERMINALS | 5 | Montreal port terminals |
-| VESSELS | 20 | Ships servicing the St. Lawrence |
-| CONTAINER_MANIFESTS | 200 | Shipping manifests |
-| CARGO_INVOICES | 300 | Commercial invoices |
-| RAIL_SCHEDULES | 150 | CN/CP Rail schedules |
-| CRANE_UTILIZATION | 400 | Crane performance metrics |
-| TRUCK_QUEUE_TIMES | 300 | Truck gate queue data |
-| PORT_INCIDENT_LOGS | 40 | Safety/operations incidents |
-| MARINE_SAFETY_REPORTS | 20 | Marine safety narratives |
-| CBSA_INSPECTION_REPORTS | 25 | Customs inspection reports |
+| COMPANIES | 25 | Pre-IPO companies on the platform (Stripe, SpaceX, etc.) |
+| SHAREHOLDERS | 60 | Sellers with shares to trade |
+| LISTINGS | 200 | Active and historical share listings |
+| TRADE_EXECUTIONS | 350 | Completed secondary transactions |
+| PRICING_SIGNALS | 150 | Valuation signals and 409A data |
+| PLATFORM_ACTIVITY | 300 | Daily platform engagement metrics |
+| USER_SESSIONS | 200 | User session and device data |
+| COMPLIANCE_REVIEWS | 50 | KYC/AML and accreditation reviews |
+| SUPPORT_TICKETS | 75 | Customer support interactions |
+| REGULATORY_FILINGS | 50 | SEC Form D and other filings |
 """)
 
 
-PROMPT_1_3 = """Run a query in PORT_MTL_AI.PORT_OPS that shows every table name and its row count, ordered by row count descending. Format it nicely."""
+PROMPT_1_3 = """Run a query in HIIVE_AI.MARKETPLACE_OPS that shows every table name and its row count, ordered by row count descending. Format it nicely."""
 
 render_prompt("Prompt 1.3", "Verify All Data Tables", PROMPT_1_3)
 
@@ -113,8 +113,8 @@ A quick verification query:
 
 ```sql
 SELECT table_name, row_count
-FROM PORT_MTL_AI.INFORMATION_SCHEMA.TABLES
-WHERE table_schema = 'PORT_OPS'
+FROM HIIVE_AI.INFORMATION_SCHEMA.TABLES
+WHERE table_schema = 'MARKETPLACE_OPS'
   AND table_type = 'BASE TABLE'
 ORDER BY row_count DESC;
 ```
@@ -124,13 +124,13 @@ You should see approximately **1,460 total rows** across 10 tables.
 
 
 render_key_concepts([
-    {"term": "External Stage", "definition": "A named Snowflake object that points to an external location (S3, Azure Blob, GCS, or HTTP URL). Used to reference files for loading without moving them into Snowflake first."},
+    {"term": "Internal Stage", "definition": "A named Snowflake object that stores files within Snowflake's managed storage. Used to upload and reference files for loading via COPY INTO. Simpler than external stages when files are uploaded directly."},
     {"term": "INFER_SCHEMA", "definition": "A Snowflake table function that automatically detects column names and types from files in a stage. Eliminates manual CREATE TABLE DDL for well-structured CSV/Parquet files."},
     {"term": "File Format", "definition": "A named object specifying how to parse files (CSV delimiters, headers, quoting, compression). Created once and reused across multiple COPY INTO operations."},
 ])
 
 render_what_you_built([
-    "PORT_MTL_AI database and PORT_OPS schema",
-    "PORT_MTL_WH warehouse (Medium, auto-suspend 60s)",
-    "10 operational data tables loaded from CSV (~1,460 total rows)",
+    "HIIVE_AI database and MARKETPLACE_OPS schema",
+    "HIIVE_WH warehouse (Medium, auto-suspend 60s)",
+    "10 marketplace data tables loaded from CSV (~1,460 total rows)",
 ])

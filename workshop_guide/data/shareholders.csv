@@ -1,0 +1,26 @@
+shareholder_id,shareholder_name,shareholder_type,company_id,shares_held,acquisition_date,acquisition_price_per_share,vesting_status,accredited_investor
+SH001,Sarah Chen,employee,C001,393786,2021-01-31,22.33,fully_vested,TRUE
+SH002,James Williams,ex_employee,C002,314588,2022-09-25,4.64,fully_vested,TRUE
+SH003,Priya Patel,early_investor,C009,320631,2018-04-19,48.58,cliff_pending,FALSE
+SH004,Michael O'Brien,early_investor,C008,313944,2021-02-13,69.18,fully_vested,TRUE
+SH005,Chen Zhang,advisor,C006,150684,2019-09-29,19.87,partially_vested,TRUE
+SH006,Alexandra Volkov,employee,C007,55707,2022-01-10,72.34,cliff_pending,FALSE
+SH007,David Kim,employee,C012,245870,2024-01-06,12.36,partially_vested,TRUE
+SH008,Maria Santos,ex_employee,C005,439846,2022-01-21,49.92,cliff_pending,TRUE
+SH009,Kevin Murphy,employee,C011,124484,2021-03-31,83.77,fully_vested,TRUE
+SH010,Yuki Tanaka,advisor,C005,242717,2022-02-03,15.5,partially_vested,TRUE
+SH011,Robert Fischer,founder,C012,496076,2018-10-20,52.56,fully_vested,TRUE
+SH012,Fatima Al-Hassan,early_investor,C008,203943,2021-01-10,84.13,cliff_pending,TRUE
+SH013,Daniel Lee,founder,C014,407817,2018-08-18,21.01,fully_vested,FALSE
+SH014,Lisa Johansson,advisor,C005,39701,2020-05-14,77.79,cliff_pending,FALSE
+SH015,Omar Rodriguez,early_investor,C011,266740,2022-06-09,75.43,cliff_pending,FALSE
+SH016,Rachel Nakamura,early_investor,C005,78206,2020-10-07,63.83,cliff_pending,FALSE
+SH017,Thomas Wright,ex_employee,C007,475717,2022-06-24,32.05,fully_vested,FALSE
+SH018,Nina Okafor,employee,C013,29702,2019-03-26,14.69,fully_vested,FALSE
+SH019,Brian Petrov,ex_employee,C002,206728,2022-04-13,51.46,partially_vested,FALSE
+SH020,Sophia Andersson,ex_employee,C014,499105,2018-02-17,58.46,fully_vested,FALSE
+SH021,Marcus Cohen,founder,C002,158878,2022-11-16,15.13,fully_vested,FALSE
+SH022,Emily Moreau,ex_employee,C013,98665,2023-09-11,77.75,cliff_pending,FALSE
+SH023,Hassan Singh,ex_employee,C010,109286,2019-09-19,33.03,fully_vested,TRUE
+SH024,Julia Torres,ex_employee,C006,261170,2018-03-21,11.29,partially_vested,FALSE
+SH025,Andrew Park,early_investor,C001,131286,2024-05-12,80.6,fully_vested,FALSE

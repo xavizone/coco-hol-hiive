@@ -13,8 +13,8 @@ def _title(session_num: int, label: str) -> str:
 
 
 st.set_page_config(
-    page_title="Port of Montreal AI Workshop",
-    page_icon=":material/anchor:",
+    page_title="HIIVE Data Intelligence Workshop",
+    page_icon=":material/trending_up:",
     layout="wide",
 )
 
@@ -39,6 +39,12 @@ page = st.navigation(
             st.Page("app_pages/session_04.py", title=_title(4, "Cortex Agents"), icon=":material/smart_toy:"),
             st.Page("app_pages/session_05.py", title=_title(5, "CoWork"), icon=":material/group:"),
             st.Page("app_pages/session_06.py", title=_title(6, "Streamlit"), icon=":material/web:"),
+        ],
+        "Block 3: Monitoring & Quality": [
+            st.Page("app_pages/session_07.py", title=_title(7, "DMF & Monitoring"), icon=":material/monitoring:"),
+        ],
+        "Reference": [
+            st.Page("app_pages/reference_coco.py", title="Cortex Code Plugin", icon=":material/extension:"),
         ],
     },
     position="sidebar",

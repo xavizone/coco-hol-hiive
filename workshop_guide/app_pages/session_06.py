@@ -20,25 +20,25 @@ Paste the prompts below into Cortex Code **within Workspaces** so the generated 
 """)
 
 
-PROMPT_6_1 = """In PORT_MTL_AI.PORT_OPS, create a Streamlit app called PORT_OPS_DASHBOARD that runs on the container runtime.
+PROMPT_6_1 = """In HIIVE_AI.MARKETPLACE_OPS, create a Streamlit app called MARKETPLACE_DASHBOARD that runs on the container runtime.
 
 First, create a compute pool for the app:
-- Name: PORT_MTL_COMPUTE_POOL
+- Name: HIIVE_COMPUTE_POOL
 - Use the CPU_X64_S instance family
 - Min and max nodes of 1
 
 Then create the Streamlit app on that compute pool with these 2 pages:
 
-PAGE 1 - Operations Dashboard:
-- KPI cards at the top showing: Total TEUs (from CONTAINER_MANIFESTS), Active Vessels (count of distinct vessels), Avg Wait Time (from TRUCK_QUEUE_TIMES), CBSA Clearance Rate (% with status 'cleared' from CONTAINER_MANIFESTS)
-- A bar chart of TEU volume by terminal (join CONTAINER_MANIFESTS to TERMINALS)
-- A line chart showing daily container arrivals over time
-- A table of recent incidents from PORT_INCIDENT_LOGS with severity color coding
+PAGE 1 - Marketplace Dashboard:
+- KPI cards at the top showing: Total Trade Volume USD (from TRADE_EXECUTIONS), Active Listings (count with status 'active' from LISTINGS), Avg Execution Price (from TRADE_EXECUTIONS), Compliance Clearance Rate (% with status 'cleared' from COMPLIANCE_REVIEWS)
+- A bar chart of trade volume by company (join TRADE_EXECUTIONS to COMPANIES)
+- A line chart showing daily trades over time
+- A table of recent compliance reviews with risk_score color coding
 
-PAGE 2 - Port Intelligence Chat:
+PAGE 2 - Marketplace Intelligence Chat:
 - A chat interface where users can type natural language questions
-- Uses our PORT_OPS_AGENT via SNOWFLAKE.CORTEX.AGENT() to answer questions
-- Has a sidebar showing summary stats: total incidents, total TEUs, number of terminals
+- Uses our MARKETPLACE_OPS_AGENT via SNOWFLAKE.CORTEX.AGENT() to answer questions
+- Has a sidebar showing summary stats: total trades, active listings, companies tracked
 
 Important for container runtime:
 - Create an External Access Integration that allows access to pypi.org and files.pythonhosted.org
@@ -57,7 +57,7 @@ Creates a full **Streamlit in Snowflake** application on the **container runtime
 
 **Step 1 — Compute pool**:
 ```sql
-CREATE COMPUTE POOL PORT_MTL_COMPUTE_POOL
+CREATE COMPUTE POOL HIIVE_COMPUTE_POOL
   MIN_NODES = 1 MAX_NODES = 1
   INSTANCE_FAMILY = CPU_X64_S;
 ```
@@ -76,15 +76,15 @@ CREATE EXTERNAL ACCESS INTEGRATION pypi_access_integration
 - Write streamlit_app.py, pages, and pyproject.toml to a stage
 - Create the Streamlit object on the compute pool
 
-**Page 1 — Operations Dashboard** pattern:
+**Page 1 — Marketplace Dashboard** pattern:
 ```python
 conn = st.connection("snowflake")
 session = conn.session()
-teu_df = session.sql("SELECT SUM(teu_count) FROM CONTAINER_MANIFESTS").collect()
-st.metric("Total TEUs", f"{teu_df[0][0]:,.0f}")
+volume_df = session.sql("SELECT SUM(trade_value) FROM TRADE_EXECUTIONS").collect()
+st.metric("Total Trade Volume", f"${volume_df[0][0]:,.0f}")
 ```
 
-**Page 2 — Chat interface** uses `st.chat_input` and `st.chat_message` with the PORT_OPS_AGENT for responses.
+**Page 2 — Chat interface** uses `st.chat_input` and `st.chat_message` with the MARKETPLACE_OPS_AGENT for responses.
 
 **Key advantages of SiS**:
 - **No data movement**: App runs inside Snowflake
@@ -96,8 +96,8 @@ st.metric("Total TEUs", f"{teu_df[0][0]:,.0f}")
 PROMPT_6_2 = """Show me the SQL to verify the Streamlit app and compute pool:
 
 1. SHOW COMPUTE POOLS;
-2. SHOW STREAMLITS IN SCHEMA PORT_MTL_AI.PORT_OPS;
-3. Describe the streamlit PORT_OPS_DASHBOARD;
+2. SHOW STREAMLITS IN SCHEMA HIIVE_AI.MARKETPLACE_OPS;
+3. Describe the streamlit MARKETPLACE_DASHBOARD;
 
 Also provide me with the direct URL to open the Streamlit app in Snowsight."""
 
@@ -126,15 +126,15 @@ Verification and access:
 
 **Accessing the app**: SiS apps are accessible via Snowsight at:
 ```
-https://app.snowflake.com/<account>/#/streamlit-apps/PORT_MTL_AI.PORT_OPS.PORT_OPS_DASHBOARD
+https://app.snowflake.com/<account>/#/streamlit-apps/HIIVE_AI.MARKETPLACE_OPS.MARKETPLACE_DASHBOARD
 ```
 
 **Sharing the app** with other roles:
 ```sql
-GRANT USAGE ON STREAMLIT PORT_OPS_DASHBOARD TO ROLE <role_name>;
+GRANT USAGE ON STREAMLIT MARKETPLACE_DASHBOARD TO ROLE <role_name>;
 ```
 
-This completes the workshop — you've built a full AI-powered operations platform from data loading through to a deployed application, all in under 3 hours!
+This completes the workshop — you've built a full AI-powered marketplace operations platform from data loading through to a deployed application, all in under 90 minutes!
 """)
 
 
@@ -146,8 +146,8 @@ render_key_concepts([
 ])
 
 render_what_you_built([
-    "PORT_MTL_COMPUTE_POOL — compute pool for container runtime",
-    "PORT_OPS_DASHBOARD — 2-page Streamlit app",
-    "Operations Dashboard with KPIs, charts, and incident table",
-    "AI-powered chat interface connected to PORT_OPS_AGENT",
+    "HIIVE_COMPUTE_POOL — compute pool for container runtime",
+    "MARKETPLACE_DASHBOARD — 2-page Streamlit app",
+    "Marketplace Dashboard with KPIs, charts, and compliance table",
+    "AI-powered chat interface connected to MARKETPLACE_OPS_AGENT",
 ])

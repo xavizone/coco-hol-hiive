@@ -1,52 +1,41 @@
 import streamlit as st
 
 st.title("Getting Started")
-st.markdown("Provision a Snowflake account for the workshop")
+st.markdown("Confirm your Snowflake access for the workshop")
 
 st.space("small")
 
-st.markdown("#### Step 1: Sign up for a free trial")
+st.markdown("#### Step 1: Confirm account access")
 
 with st.container(border=True):
     st.markdown("""
-Go to **[signup.snowflake.com](https://signup.snowflake.com/?t=bee03e90021992ff6eb7106736740f981a9de91cce720d5bb50b59ed14c5caa3)** and fill out the registration form with your name, email, and company.
+You already have a Snowflake account. Confirm you can log in and have the appropriate role:
 
-On the **Choose your Snowflake edition** screen, select:
+1. Log in to your Snowflake account via Snowsight
+2. Check your current role — you'll need **ACCOUNTADMIN** or a role with privileges to create databases, warehouses, and Cortex objects
+3. If using a dedicated workshop role, ensure it has been granted the necessary privileges
 
-| Setting | Recommended value |
-|---------|-------------------|
-| **Cloud provider** | Amazon Web Services (AWS) |
-| **Edition** | Enterprise |
-| **Region** | AWS US East (Ohio) or Canada (Central) |
-
-Enterprise edition is recommended because it includes all the AI/ML features we use in this workshop.
+:material/info: If you're unsure about role permissions, run:
+```sql
+SELECT CURRENT_ROLE(), CURRENT_ACCOUNT();
+SHOW GRANTS TO ROLE <your_role>;
+```
 """)
 
 st.space("small")
 
-st.markdown("#### Step 2: Activate your account")
-
-with st.container(border=True):
-    st.markdown("""
-After submitting the form, Snowflake sends an **activation link** to the email address you provided. Click the link to set your password and log in.
-
-:material/info: The activation email typically arrives within a few minutes. Check your spam folder if you don't see it.
-""")
-
-st.space("small")
-
-st.markdown("#### Step 3: Open Cortex Code")
+st.markdown("#### Step 2: Open Cortex Code")
 
 with st.container(border=True):
     st.markdown("""
 Once logged in to Snowsight, open **Cortex Code** from the left navigation panel. This is the AI coding assistant where you will paste all prompts from this workshop.
 
-Confirm you are using the **ACCOUNTADMIN** role — you can check and switch roles in the bottom-left of the Snowsight UI.
+Confirm you are using the correct role — you can check and switch roles in the bottom-left of the Snowsight UI.
 """)
 
 st.space("small")
 
-st.markdown("#### Step 4: Enable cross-region inference")
+st.markdown("#### Step 3: Enable cross-region inference")
 
 with st.container(border=True):
     st.markdown("""
@@ -61,11 +50,27 @@ This allows Snowflake to route LLM requests to the nearest available region if t
 
 st.space("small")
 
-st.markdown("#### Free trial details")
+st.markdown("#### Step 4 (Optional): Install Cortex Code Plugin in VS Code")
 
-col1, col2, col3 = st.columns(3)
-col1.metric("Duration", "30 days", help="Free trial duration from activation")
-col2.metric("Credits", "$400", help="Complimentary Snowflake credits included")
-col3.metric("Credit card", "Not required", help="No payment method needed to start")
+with st.container(border=True):
+    st.markdown("""
+If you'd like to use Cortex Code from VS Code alongside your existing Claude Code setup:
 
-st.caption("The free trial provides more than enough credits to complete the entire workshop")
+1. Open VS Code → Extensions → search **"Snowflake"** → Install
+2. Command Palette (`Cmd+Shift+P`) → **"Snowflake: Sign In"**
+3. Configure your connection in `~/.snowflake/connections.toml`
+
+See the **Cortex Code Plugin** reference page in the sidebar for full setup details.
+
+:material/warning: **Cloudflare VPN note**: If you encounter SSL certificate issues, you may need to set `insecure_mode = true` in your connection config or add Cloudflare's root cert to the trust store.
+""")
+
+st.space("small")
+
+st.markdown("#### Quick verification")
+
+col1, col2 = st.columns(2)
+col1.metric("Required", "ACCOUNTADMIN", help="Or equivalent role with CREATE privileges")
+col2.metric("Cross-region", "ANY_REGION", help="Enables Cortex LLM access across regions")
+
+st.caption("Once you've confirmed access and enabled cross-region inference, you're ready to start Session 1")
