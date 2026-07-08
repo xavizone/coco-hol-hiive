@@ -23,26 +23,18 @@ Data Metric Functions (DMFs) require **Snowflake Enterprise Edition** or higher.
 """)
 
 
-PROMPT_7_1 = """In your workshop schema in HIIVE_COCO_HOL, set up Data Metric Functions (DMFs) for continuous monitoring of our critical tables.
+PROMPT_7_1 = """Set up Data Metric Functions for continuous monitoring of our critical marketplace tables.
 
-1. Set up the event table for DMF results:
-ALTER DATABASE HIIVE_COCO_HOL SET DATA_METRIC_SCHEDULE_EVENT_TABLE = 'HIIVE_COCO_HOL.' || CURRENT_USER() || '_OPS.DMF_EVENTS';
+I need you to:
+1. Configure an event table in my schema to store DMF results
+2. Apply built-in system DMFs to these tables:
+   - TRADE_EXECUTIONS: check for NULLs in compliance_status, track row count, and monitor freshness
+   - LISTINGS: check for NULLs in ask_price_per_share and track row count
+   - COMPLIANCE_REVIEWS: track row count and monitor freshness
+3. Schedule them to trigger on data changes
+4. Verify the DMF references are active by querying INFORMATION_SCHEMA.DATA_METRIC_FUNCTION_REFERENCES
 
-2. Apply built-in system DMFs to our critical tables:
-   - TRADE_EXECUTIONS: NULL_COUNT on compliance_status, ROW_COUNT, FRESHNESS
-   - LISTINGS: NULL_COUNT on ask_price_per_share, ROW_COUNT
-   - COMPLIANCE_REVIEWS: ROW_COUNT, FRESHNESS
-
-3. Schedule them to run on changes:
-ALTER TABLE TRADE_EXECUTIONS SET DATA_METRIC_SCHEDULE = 'TRIGGER_ON_CHANGES';
-
-4. Verify the DMF references are active:
-SELECT * FROM TABLE(INFORMATION_SCHEMA.DATA_METRIC_FUNCTION_REFERENCES(
-  REF_ENTITY_NAME => '<your schema>.TRADE_EXECUTIONS',
-  REF_ENTITY_DOMAIN => 'TABLE'
-));
-
-Execute all SQL and confirm DMFs are attached."""
+Execute everything and show me what's attached."""
 
 render_prompt("Prompt 7.1", "Create System DMFs for Critical Tables", PROMPT_7_1)
 
@@ -66,64 +58,28 @@ ALTER TABLE TRADE_EXECUTIONS SET DATA_METRIC_SCHEDULE = 'TRIGGER_ON_CHANGES';
 """)
 
 
-PROMPT_7_2 = """In your workshop schema in HIIVE_COCO_HOL, create custom Data Metric Functions for anomaly detection specific to our marketplace operations.
+PROMPT_7_2 = """Now create three custom Data Metric Functions for anomaly detection specific to our marketplace.
 
-1. Create a trade volume anomaly DMF (flags if today's volume is >2 standard deviations from the 30-day rolling average):
+I need:
 
-CREATE OR REPLACE DATA METRIC FUNCTION trade_volume_anomaly_check(
-  ARG_T TABLE(total_value_usd NUMBER, trade_date DATE)
-)
-RETURNS NUMBER
-AS
-$$
-  SELECT CASE 
-    WHEN today_volume > avg_volume + (2 * stddev_volume) THEN 1
-    WHEN today_volume < avg_volume - (2 * stddev_volume) THEN -1
-    ELSE 0
-  END
-  FROM (
-    SELECT 
-      SUM(CASE WHEN trade_date = CURRENT_DATE() THEN total_value_usd ELSE 0 END) as today_volume,
-      AVG(CASE WHEN trade_date < CURRENT_DATE() THEN total_value_usd END) as avg_volume,
-      STDDEV(CASE WHEN trade_date < CURRENT_DATE() THEN total_value_usd END) as stddev_volume
-    FROM ARG_T
-    WHERE trade_date >= DATEADD(day, -30, CURRENT_DATE())
-  )
-$$;
+1. A trade volume anomaly DMF called trade_volume_anomaly_check that:
+   - Takes a table argument with total_value_usd and trade_date columns
+   - Compares today's trade volume against the 30-day rolling average
+   - Returns 1 if volume is more than 2 standard deviations above average (spike), -1 if below (drop), 0 if normal
 
-2. Create a pricing deviation DMF (flags trades >20% below latest 409A valuation):
+2. A pricing deviation DMF called pricing_deviation_check that:
+   - Takes a table argument with execution_price_per_share and company_id columns
+   - Cross-references against the latest 409A valuation in PRICING_SIGNALS
+   - Returns the count of trades executing at more than 20% below the latest 409A price
 
-CREATE OR REPLACE DATA METRIC FUNCTION pricing_deviation_check(
-  ARG_T TABLE(execution_price_per_share NUMBER, company_id VARCHAR)
-)
-RETURNS NUMBER
-AS
-$$
-  SELECT COUNT(*)
-  FROM ARG_T t
-  JOIN PRICING_SIGNALS p ON t.company_id = p.company_id
-  WHERE p.signal_type = '409a_valuation'
-    AND p.signal_date = (SELECT MAX(signal_date) FROM PRICING_SIGNALS WHERE company_id = t.company_id AND signal_type = '409a_valuation')
-    AND t.execution_price_per_share < p.price_per_share * 0.8
-$$;
+3. A compliance backlog DMF called compliance_backlog_check that:
+   - Takes a table argument with outcome and review_date columns
+   - Counts reviews with status 'escalated' or 'conditionally_approved' that are older than 7 days
+   - Returns that count (0 = healthy, >0 = backlog building)
 
-3. Create a compliance backlog DMF (flags if unresolved reviews exceed threshold):
+4. Apply all three custom DMFs to the appropriate tables
 
-CREATE OR REPLACE DATA METRIC FUNCTION compliance_backlog_check(
-  ARG_T TABLE(outcome VARCHAR, review_date DATE)
-)
-RETURNS NUMBER
-AS
-$$
-  SELECT COUNT(*)
-  FROM ARG_T
-  WHERE outcome IN ('escalated', 'conditionally_approved')
-    AND review_date < DATEADD(day, -7, CURRENT_DATE())
-$$;
-
-4. Apply these custom DMFs to the appropriate tables and verify.
-
-Execute all SQL."""
+Execute everything and confirm they're attached."""
 
 render_prompt("Prompt 7.2", "Create Custom DMFs for Anomaly Detection", PROMPT_7_2)
 
@@ -138,53 +94,19 @@ Creates business-specific anomaly detection that goes far beyond generic null ch
 """)
 
 
-PROMPT_7_3 = """In your workshop schema in HIIVE_COCO_HOL, set up alerting on DMF results so anomalies trigger notifications automatically.
+PROMPT_7_3 = """Now set up alerting so DMF anomalies trigger notifications automatically.
 
-1. Query recent DMF results from the event table:
-SELECT 
-  METRIC_NAME,
-  TABLE_NAME, 
-  VALUE,
-  MEASUREMENT_TIME,
-  TABLE_SCHEMA
-FROM DMF_EVENTS
-ORDER BY MEASUREMENT_TIME DESC
-LIMIT 20;
+I need you to:
+1. Query the most recent 20 DMF results from my event table — show me the metric name, table name, value, and measurement time
+2. Create an alert called trade_volume_alert that:
+   - Runs every hour (CRON schedule, America/Vancouver timezone)
+   - Uses the HIIVE_COCO_HOL_WH warehouse
+   - Checks if any trade_volume_anomaly_check measurement in the last hour returned a non-zero value
+   - If triggered, sends an email to data-team@hiive.com with subject "ALERT: Trade Volume Anomaly Detected"
+3. Resume the alert so it starts running
+4. Show me a query that summarizes historical DMF trends — group by metric, table, value, and hour so we can see patterns over time
 
-2. Create an alert that fires when trade volume anomaly is detected:
-
-CREATE OR REPLACE ALERT trade_volume_alert
-  WAREHOUSE = HIIVE_COCO_HOL_WH
-  SCHEDULE = 'USING CRON 0 * * * * America/Vancouver'
-  IF (EXISTS (
-    SELECT 1 FROM DMF_EVENTS
-    WHERE METRIC_NAME = 'TRADE_VOLUME_ANOMALY_CHECK'
-      AND VALUE != 0
-      AND MEASUREMENT_TIME > DATEADD(hour, -1, CURRENT_TIMESTAMP())
-  ))
-  THEN
-    CALL SYSTEM$SEND_EMAIL(
-      'hiive_alerts',
-      'data-team@hiive.com',
-      'ALERT: Trade Volume Anomaly Detected',
-      'A trade volume anomaly was detected. Please investigate in the DMF_EVENTS table.'
-    );
-
-3. Resume the alert:
-ALTER ALERT trade_volume_alert RESUME;
-
-4. Show how to query historical DMF trends:
-SELECT 
-  METRIC_NAME,
-  TABLE_NAME,
-  VALUE,
-  DATE_TRUNC('hour', MEASUREMENT_TIME) as hour,
-  COUNT(*) as measurements
-FROM DMF_EVENTS
-GROUP BY 1, 2, 3, 4
-ORDER BY hour DESC;
-
-Execute all SQL and explain how this compares to the current dbt Elementary setup."""
+Execute everything and explain how this compares to what we'd get from dbt Elementary."""
 
 render_prompt("Prompt 7.3", "Schedule DMFs and Create Alerts", PROMPT_7_3)
 
