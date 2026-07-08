@@ -22,6 +22,11 @@ Run these **before July 16** so the environment is ready when attendees arrive.
 
 ### Setup Script (run as ACCOUNTADMIN)
 
+**Step 0 — Download the workshop data files:**
+> https://github.com/xavizone/coco-hol-hiive/tree/main/workshop_guide/data
+>
+> Download all 10 CSV files from the link above. You'll upload them to the shared stage in step 4.
+
 ```sql
 -- 1. Create shared database
 CREATE DATABASE IF NOT EXISTS HIIVE_COCO_HOL;
