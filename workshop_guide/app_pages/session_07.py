@@ -31,10 +31,11 @@ I need you to:
    - TRADE_EXECUTIONS: check for NULLs in compliance_status, track row count, and monitor freshness
    - LISTINGS: check for NULLs in ask_price_per_share and track row count
    - COMPLIANCE_REVIEWS: track row count and monitor freshness
-3. Schedule them to trigger on data changes
-4. Verify the DMF references are active by querying INFORMATION_SCHEMA.DATA_METRIC_FUNCTION_REFERENCES
+3. Schedule them on a 2-minute CRON interval so we can see results during this session (use 'USING CRON */2 * * * * America/Vancouver')
+4. Also insert a test row into TRADE_EXECUTIONS to trigger an immediate evaluation — something like trade_id='DMF_TEST_001', with today's date, a NULL compliance_status, and reasonable values for the other columns
+5. Verify the DMF references are active by querying INFORMATION_SCHEMA.DATA_METRIC_FUNCTION_REFERENCES
 
-Execute everything and show me what's attached."""
+Execute everything and show me what's attached. We should see DMF results in the event table within 2 minutes."""
 
 render_prompt("Prompt 7.1", "Create System DMFs for Critical Tables", PROMPT_7_1)
 
@@ -50,9 +51,17 @@ ALTER TABLE TRADE_EXECUTIONS ADD DATA METRIC FUNCTION SNOWFLAKE.CORE.NULL_COUNT 
 ALTER TABLE TRADE_EXECUTIONS ADD DATA METRIC FUNCTION SNOWFLAKE.CORE.ROW_COUNT ON ();
 ALTER TABLE TRADE_EXECUTIONS ADD DATA METRIC FUNCTION SNOWFLAKE.CORE.FRESHNESS ON ();
 
--- Schedule monitoring
-ALTER TABLE TRADE_EXECUTIONS SET DATA_METRIC_SCHEDULE = 'TRIGGER_ON_CHANGES';
+-- Schedule on 2-minute CRON (so we see results during the lab)
+ALTER TABLE TRADE_EXECUTIONS SET DATA_METRIC_SCHEDULE = 'USING CRON */2 * * * * America/Vancouver';
+
+-- Insert a test row to also trigger immediate evaluation
+INSERT INTO TRADE_EXECUTIONS (trade_id, trade_date, compliance_status, ...)
+  VALUES ('DMF_TEST_001', CURRENT_DATE(), NULL, ...);
 ```
+
+**Why 2-minute CRON instead of TRIGGER_ON_CHANGES?** In production you'd use TRIGGER_ON_CHANGES so DMFs fire only when data arrives (cheaper). But for a live lab, a short CRON ensures we see results in the UI within 2 minutes — regardless of whether new data lands.
+
+**Why the test INSERT?** The NULL compliance_status will show up in NULL_COUNT, the new row bumps ROW_COUNT, and FRESHNESS resets to "just now." This gives us immediate proof the DMFs are working.
 
 **System DMFs available**: NULL_COUNT, DUPLICATE_COUNT, ROW_COUNT, FRESHNESS, UNIQUE_COUNT. These cover the most common data quality checks without any custom code.
 """)
@@ -134,6 +143,25 @@ CREATE OR REPLACE ALERT trade_volume_alert
 **Position**: Keep dbt Elementary for schema/logic validation. Add DMFs for the gap — continuous monitoring that doesn't depend on GitHub Actions reliability.
 """)
 
+
+st.info("""
+:material/monitor_heart: **Verify DMFs in the Snowsight UI**
+
+After running the prompts above, you can view and manage your DMFs directly in Snowsight:
+
+1. **Data Quality tab** — Navigate to **Monitoring → Data Quality** in the left sidebar. You'll see all active DMF schedules, recent results, and any anomaly flags across your tables.
+
+2. **Table-level DMF view** — Browse to any table (e.g., `HIIVE_COCO_HOL → <your_schema> → TRADE_EXECUTIONS`), then click the **Data Quality** tab on the table detail page. This shows all DMFs attached to that specific table with their latest metric values and history charts.
+
+3. **Alerts monitoring** — Navigate to **Monitoring → Alerts** in the left sidebar to see your `trade_volume_alert`. You can view execution history, check if it has fired, and manually suspend/resume it.
+
+4. **Event table results** — The DMF_EVENTS table in your schema stores all historical measurements. You can query it directly or view it in the Data Preview tab to see raw metric values and timestamps.
+
+**What to look for in the UI:**
+- Green checkmarks = DMF passed (value within threshold)
+- Red/yellow indicators = DMF flagged an anomaly
+- History charts show metric trends over time — useful for spotting gradual drift vs sudden spikes
+""")
 
 render_key_concepts([
     {"term": "Data Metric Function (DMF)", "definition": "A Snowflake UDF-like function specifically designed to measure data quality metrics. Can be system-provided (NULL_COUNT, FRESHNESS, ROW_COUNT, DUPLICATE_COUNT, UNIQUE_COUNT) or custom-built for business logic. DMFs are attached to tables and run on a schedule."},
