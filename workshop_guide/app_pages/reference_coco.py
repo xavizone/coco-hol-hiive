@@ -35,13 +35,13 @@ st.space("small")
 st.markdown("#### Connecting to Your Account")
 with st.container(border=True):
     st.markdown("Connection config lives in VS Code settings or `~/.snowflake/connections.toml`:")
-    st.code("""[hiive_prod]
+    st.code("""[hiive_coco_hol]
 account = "your_account"
 user = "your_user"
 authenticator = "externalbrowser"
-warehouse = "HIIVE_WH"
-database = "HIIVE_AI"
-schema = "MARKETPLACE_OPS"
+warehouse = "HIIVE_COCO_HOL_WH"
+database = "HIIVE_COCO_HOL"
+schema = ""  # Leave blank - set per session
 """, language="toml")
     st.markdown("""
 :material/warning: **Cloudflare VPN note**: If you hit SSL certificate issues, you may need to set `insecure_mode = true` in your connection config or add Cloudflare's root cert to the trust store.
@@ -57,7 +57,7 @@ col1, col2 = st.columns(2)
 with col1:
     with st.container(border=True):
         st.markdown(":material/database: **Schema Discovery**")
-        st.caption("\"Show me all tables in HIIVE_AI.MARKETPLACE_OPS and their row counts\"")
+        st.caption("\"Show me all tables in HIIVE_COCO_HOL.<username>_OPS and their row counts\"")
         st.markdown("CoCo executes this against live Snowflake — no manual connection setup.")
 
     with st.container(border=True):

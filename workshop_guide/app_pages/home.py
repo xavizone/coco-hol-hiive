@@ -73,6 +73,9 @@ with st.container(border=True):
 - Your own dev/Sandbox Snowflake account or a Trial Snowflake account with **ACCOUNTADMIN** role [**Snowflake Trial** Account](signup.snowflake.com);
 - **Cortex Code** open in Snowsight and connected to your account
 - Cross-region inference enabled (for Cortex LLM functions)
+- Admin has pre-configured `HIIVE_COCO_HOL` database, warehouse (`HIIVE_COCO_HOL_WH`), and shared resources
+- Your personal schema will be created automatically using your Snowflake username (e.g., `HIIVE_COCO_HOL.XAVIER_OPS`)
+- See the **Getting Started** page for detailed environment setup instructions
 """)
 
 st.space("medium")

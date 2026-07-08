@@ -10,7 +10,7 @@ render_technologies_used([
 ])
 
 
-PROMPT_3_1 = """In HIIVE_AI.MARKETPLACE_OPS:
+PROMPT_3_1 = """In your workshop schema in HIIVE_COCO_HOL:
 
 1. First, create a unified text table for search called MARKETPLACE_KNOWLEDGE_BASE that combines:
    - COMPLIANCE_REVIEWS: review_id as doc_id, 'compliance_review' as doc_type, findings_text as content, review_type as metadata_category, outcome as metadata_priority, review_date as doc_date
@@ -21,7 +21,7 @@ PROMPT_3_1 = """In HIIVE_AI.MARKETPLACE_OPS:
    CREATE OR REPLACE CORTEX SEARCH SERVICE marketplace_knowledge_search
      ON content
      ATTRIBUTES metadata_category, metadata_priority, doc_type
-     WAREHOUSE = HIIVE_WH
+     WAREHOUSE = HIIVE_COCO_HOL_WH
      TARGET_LAG = '1 hour'
      EMBEDDING_MODEL = 'snowflake-arctic-embed-l-v2.0'
      AS (
@@ -56,24 +56,14 @@ Two major steps: building a unified knowledge base and creating a search service
 """)
 
 
-PROMPT_3_2 = """In HIIVE_AI.MARKETPLACE_OPS, query our marketplace_knowledge_search service using SEARCH_PREVIEW with these searches:
+PROMPT_3_2 = """In your workshop schema in HIIVE_COCO_HOL, query our marketplace_knowledge_search service using SEARCH_PREVIEW with these searches:
 
 1. Search: "KYC verification failure" - show top 3 results
 2. Search: "transfer delay settlement" - show top 3 results
 3. Search: "SEC filing Form D" filtered to doc_type = 'regulatory_filing' - show top 3 results
 4. Search: "accredited investor qualification" - show top 3 results
 
-Use this pattern for each:
-SELECT PARSE_JSON(
-  SNOWFLAKE.CORTEX.SEARCH_PREVIEW(
-    'HIIVE_AI.MARKETPLACE_OPS.marketplace_knowledge_search',
-    '{
-      "query": "<search_query>",
-      "columns": ["doc_id", "doc_type", "content", "metadata_category"],
-      "limit": 3
-    }'
-  )
-)['results'] as results;
+Use SEARCH_PREVIEW with the fully qualified service name in your schema for each query.
 
 Execute all 4 searches and show results."""
 
@@ -102,18 +92,18 @@ Four search queries demonstrating different capabilities:
 """)
 
 
-PROMPT_3_3 = """In HIIVE_AI.MARKETPLACE_OPS, implement a RAG pattern that:
+PROMPT_3_3 = """In your workshop schema in HIIVE_COCO_HOL, implement a RAG pattern that:
 
 1. Takes a user question: "What are the most common compliance issues on the HIIVE platform and what preventive measures have been effective?"
 
-2. First retrieves the top 5 most relevant documents from marketplace_knowledge_search using SEARCH_PREVIEW
+2. First retrieves the top 5 most relevant documents from marketplace_knowledge_search using SEARCH_PREVIEW (use the fully qualified service name in your schema)
 
-3. Then passes the retrieved context + question to SNOWFLAKE.CORTEX.COMPLETE() to generate a grounded answer:
+3. Then passes the retrieved context + question to SNOWFLAKE.CORTEX.COMPLETE() to generate a grounded answer using the CTE pattern:
 
 WITH search_results AS (
     SELECT PARSE_JSON(
         SNOWFLAKE.CORTEX.SEARCH_PREVIEW(
-            'HIIVE_AI.MARKETPLACE_OPS.marketplace_knowledge_search',
+            '<fully qualified service name>',
             '{
                 "query": "common compliance issues preventive measures effectiveness",
                 "columns": ["doc_id", "doc_type", "content", "metadata_category"],
@@ -128,14 +118,8 @@ context AS (
 )
 SELECT SNOWFLAKE.CORTEX.COMPLETE(
     'claude-sonnet-4-6',
-    'You are a compliance expert at HIIVE, a private securities marketplace for pre-IPO secondary trading. Based ONLY on the following source documents, answer the user question. Cite specific documents by their doc_id when referencing findings. If the documents do not contain enough information, say so.
-
-SOURCE DOCUMENTS:
-' || combined_context || '
-
-USER QUESTION: What are the most common compliance issues on the HIIVE platform and what preventive measures have been effective?
-
-Provide a structured answer with: 1) Common compliance issues, 2) Root causes, 3) Effective preventive measures, 4) Recommendations.'
+    'You are a compliance expert at HIIVE... Based ONLY on the following source documents, answer the user question...'
+    || combined_context || '...'
 ) AS rag_response
 FROM context;
 

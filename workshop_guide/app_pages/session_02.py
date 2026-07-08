@@ -10,7 +10,7 @@ render_technologies_used([
 ])
 
 
-PROMPT_2_1 = """In HIIVE_AI.MARKETPLACE_OPS, create a semantic view called MARKETPLACE_ANALYTICS_VIEW for use with Cortex Analyst. It should cover these tables: COMPANIES, SHAREHOLDERS, LISTINGS, TRADE_EXECUTIONS, PRICING_SIGNALS, PLATFORM_ACTIVITY, USER_SESSIONS.
+PROMPT_2_1 = """In your workshop schema in HIIVE_COCO_HOL, create a semantic view called MARKETPLACE_ANALYTICS_VIEW for use with Cortex Analyst. It should cover these tables: COMPANIES, SHAREHOLDERS, LISTINGS, TRADE_EXECUTIONS, PRICING_SIGNALS, PLATFORM_ACTIVITY, USER_SESSIONS.
 
 Include:
 - Proper relationships between the tables (listings join to companies via company_id, listings join to shareholders via shareholder_id, trade_executions join to listings via listing_id, trade_executions join to companies via company_id, pricing_signals join to companies via company_id, platform_activity is standalone time-series, user_sessions is standalone time-series)
@@ -48,7 +48,7 @@ c.company_name ... WITH SYNONYMS = ('stock', 'ticker', 'issuer')
 """)
 
 
-PROMPT_2_2 = """Ask Cortex Analyst these questions using HIIVE_AI.MARKETPLACE_OPS.MARKETPLACE_ANALYTICS_VIEW:
+PROMPT_2_2 = """Ask Cortex Analyst these questions using the MARKETPLACE_ANALYTICS_VIEW in your schema:
 
 1. "What are the top 5 companies by total trade volume?"
 2. "Which sectors have the most active listings?"
@@ -80,7 +80,7 @@ Tests Cortex Analyst across different question types:
 """)
 
 
-PROMPT_2_3 = """Now expand our MARKETPLACE_ANALYTICS_VIEW semantic view in HIIVE_AI.MARKETPLACE_OPS to also include the PRICING_SIGNALS table with proper relationships and definitions.
+PROMPT_2_3 = """Now expand our MARKETPLACE_ANALYTICS_VIEW semantic view in your workshop schema to also include the PRICING_SIGNALS table with proper relationships and definitions.
 
 1. Query INFORMATION_SCHEMA.COLUMNS to get the full schema of PRICING_SIGNALS
 2. Recreate MARKETPLACE_ANALYTICS_VIEW with all original definitions plus PRICING_SIGNALS enhancements, adding:

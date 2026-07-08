@@ -20,14 +20,11 @@ Paste the prompts below into Cortex Code **within Workspaces** so the generated 
 """)
 
 
-PROMPT_6_1 = """In HIIVE_AI.MARKETPLACE_OPS, create a Streamlit app called MARKETPLACE_DASHBOARD that runs on the container runtime.
+PROMPT_6_1 = """In your workshop schema in HIIVE_COCO_HOL, create a Streamlit app that uses CURRENT_USER() || '_DASHBOARD' as the app name, running on the container runtime.
 
-First, create a compute pool for the app:
-- Name: HIIVE_COMPUTE_POOL
-- Use the CPU_X64_S instance family
-- Min and max nodes of 1
+Use the shared compute pool HIIVE_COCO_HOL_COMPUTE_POOL (already created by the admin).
 
-Then create the Streamlit app on that compute pool with these 2 pages:
+Create the Streamlit app on that compute pool with these 2 pages:
 
 PAGE 1 - Marketplace Dashboard:
 - KPI cards at the top showing: Total Trade Volume USD (from TRADE_EXECUTIONS), Active Listings (count with status 'active' from LISTINGS), Avg Execution Price (from TRADE_EXECUTIONS), Compliance Clearance Rate (% with status 'cleared' from COMPLIANCE_REVIEWS)
@@ -48,21 +45,20 @@ Important for container runtime:
 - Use st.connection("snowflake") for the Snowflake connection
 - Make it visually clean with st.columns for layout
 
-Execute all SQL to create the compute pool, stage the files, and deploy the app."""
+Execute all SQL to stage the files and deploy the app."""
 
 render_prompt("Prompt 6.1", "Create the Streamlit App", PROMPT_6_1)
 
 render_explanation("What this prompt does", """
 Creates a full **Streamlit in Snowflake** application on the **container runtime**:
 
-**Step 1 — Compute pool**:
+**Compute pool** — uses the shared `HIIVE_COCO_HOL_COMPUTE_POOL` (pre-created by the workshop admin):
 ```sql
-CREATE COMPUTE POOL HIIVE_COMPUTE_POOL
-  MIN_NODES = 1 MAX_NODES = 1
-  INSTANCE_FAMILY = CPU_X64_S;
+-- Already exists, no need to create
+-- HIIVE_COCO_HOL_COMPUTE_POOL with CPU_X64_S instance family
 ```
 
-**Step 2 — External Access Integration** (so container can install pip packages):
+**External Access Integration** (so container can install pip packages):
 ```sql
 CREATE NETWORK RULE pypi_network_rule
   MODE = EGRESS TYPE = HOST_PORT
@@ -72,9 +68,9 @@ CREATE EXTERNAL ACCESS INTEGRATION pypi_access_integration
   ALLOWED_NETWORK_RULES = (pypi_network_rule) ENABLED = TRUE;
 ```
 
-**Step 3 — Stage files and deploy**:
+**Stage files and deploy**:
 - Write streamlit_app.py, pages, and pyproject.toml to a stage
-- Create the Streamlit object on the compute pool
+- Create the Streamlit object on the shared compute pool
 
 **Page 1 — Marketplace Dashboard** pattern:
 ```python
@@ -96,8 +92,8 @@ st.metric("Total Trade Volume", f"${volume_df[0][0]:,.0f}")
 PROMPT_6_2 = """Show me the SQL to verify the Streamlit app and compute pool:
 
 1. SHOW COMPUTE POOLS;
-2. SHOW STREAMLITS IN SCHEMA HIIVE_AI.MARKETPLACE_OPS;
-3. Describe the streamlit MARKETPLACE_DASHBOARD;
+2. SHOW STREAMLITS IN SCHEMA;
+3. Describe the streamlit app;
 
 Also provide me with the direct URL to open the Streamlit app in Snowsight."""
 
@@ -118,20 +114,15 @@ Try modifying the app (add a chart, change KPI labels) and re-run to see changes
 render_explanation("What this prompt does", """
 Verification and access:
 
-**SHOW COMPUTE POOLS** — confirms the pool is ACTIVE with correct instance family.
+**SHOW COMPUTE POOLS** — confirms the shared pool is ACTIVE with correct instance family.
 
 **SHOW STREAMLITS** — lists the app with its URL endpoint.
 
 **DESCRIBE STREAMLIT** — shows main file, compute pool (confirms container runtime), and status.
 
-**Accessing the app**: SiS apps are accessible via Snowsight at:
-```
-https://app.snowflake.com/<account>/#/streamlit-apps/HIIVE_AI.MARKETPLACE_OPS.MARKETPLACE_DASHBOARD
-```
-
 **Sharing the app** with other roles:
 ```sql
-GRANT USAGE ON STREAMLIT MARKETPLACE_DASHBOARD TO ROLE <role_name>;
+GRANT USAGE ON STREAMLIT <app_name> TO ROLE <role_name>;
 ```
 
 This completes the workshop — you've built a full AI-powered marketplace operations platform from data loading through to a deployed application, all in under 90 minutes!
@@ -146,8 +137,8 @@ render_key_concepts([
 ])
 
 render_what_you_built([
-    "HIIVE_COMPUTE_POOL — compute pool for container runtime",
-    "MARKETPLACE_DASHBOARD — 2-page Streamlit app",
+    "HIIVE_COCO_HOL_COMPUTE_POOL — shared compute pool for container runtime",
+    "<username>_DASHBOARD — 2-page Streamlit app (named dynamically per user)",
     "Marketplace Dashboard with KPIs, charts, and compliance table",
     "AI-powered chat interface connected to MARKETPLACE_OPS_AGENT",
 ])

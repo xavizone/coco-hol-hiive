@@ -10,7 +10,7 @@ render_technologies_used([
 ])
 
 
-PROMPT_4_1 = """In HIIVE_AI.MARKETPLACE_OPS, create a Cortex Agent called MARKETPLACE_OPS_AGENT that marketplace operations staff can use to ask questions about both structured data and unstructured documents.
+PROMPT_4_1 = """In your workshop schema in HIIVE_COCO_HOL, create a Cortex Agent called MARKETPLACE_OPS_AGENT that marketplace operations staff can use to ask questions about both structured data and unstructured documents.
 
 It should:
 - Use auto as the orchestration model
@@ -81,11 +81,11 @@ Tests the Agent with four question types that exercise different tool routing:
 """)
 
 
-PROMPT_4_3 = """In HIIVE_AI.MARKETPLACE_OPS, enhance our agent by adding a custom tool.
+PROMPT_4_3 = """In your workshop schema in HIIVE_COCO_HOL, enhance our agent by adding a custom tool.
 
-1. Create a UDF that calculates trade risk score:
+1. Create a UDF that calculates trade risk score in your schema:
 
-CREATE OR REPLACE FUNCTION HIIVE_AI.MARKETPLACE_OPS.CALCULATE_TRADE_RISK_SCORE(
+CREATE OR REPLACE FUNCTION CALCULATE_TRADE_RISK_SCORE(
     company_name VARCHAR,
     trade_value NUMBER,
     shares_pct_of_outstanding NUMBER

@@ -9,11 +9,24 @@ render_technologies_used([
     {"name": "Snowflake Alerts", "description": "Event-driven automation triggered by conditions (like DMF threshold breaches). Can send notifications or execute corrective actions.", "icon": "notification_important"},
 ])
 
+st.warning("""
+:material/warning: **Enterprise Edition Required**
 
-PROMPT_7_1 = """In HIIVE_AI.MARKETPLACE_OPS, set up Data Metric Functions (DMFs) for continuous monitoring of our critical tables.
+Data Metric Functions (DMFs) require **Snowflake Enterprise Edition** or higher. HIIVE's current account is on **Standard Edition**, which means DMFs cannot be executed directly in this lab.
+
+**What this means for today:**
+- The Snowflake team will **live-demo** this section so you can see DMFs in action
+- Follow along with the concepts — this is exactly what your monitoring could look like after an edition discussion
+- The prompts below are provided for reference and future use
+
+**Why DMFs matter for HIIVE:** Your current monitoring stack (dbt Elementary + Datadog) is reactive — it catches issues only when dbt runs. DMFs provide continuous, scheduled monitoring that detects anomalies BETWEEN dbt runs. This is the proactive monitoring gap your team identified.
+""")
+
+
+PROMPT_7_1 = """In your workshop schema in HIIVE_COCO_HOL, set up Data Metric Functions (DMFs) for continuous monitoring of our critical tables.
 
 1. Set up the event table for DMF results:
-ALTER DATABASE HIIVE_AI SET DATA_METRIC_SCHEDULE_EVENT_TABLE = 'HIIVE_AI.MARKETPLACE_OPS.DMF_EVENTS';
+ALTER DATABASE HIIVE_COCO_HOL SET DATA_METRIC_SCHEDULE_EVENT_TABLE = 'HIIVE_COCO_HOL.' || CURRENT_USER() || '_OPS.DMF_EVENTS';
 
 2. Apply built-in system DMFs to our critical tables:
    - TRADE_EXECUTIONS: NULL_COUNT on compliance_status, ROW_COUNT, FRESHNESS
@@ -25,7 +38,7 @@ ALTER TABLE TRADE_EXECUTIONS SET DATA_METRIC_SCHEDULE = 'TRIGGER_ON_CHANGES';
 
 4. Verify the DMF references are active:
 SELECT * FROM TABLE(INFORMATION_SCHEMA.DATA_METRIC_FUNCTION_REFERENCES(
-  REF_ENTITY_NAME => 'HIIVE_AI.MARKETPLACE_OPS.TRADE_EXECUTIONS',
+  REF_ENTITY_NAME => '<your schema>.TRADE_EXECUTIONS',
   REF_ENTITY_DOMAIN => 'TABLE'
 ));
 
@@ -38,7 +51,7 @@ Sets up Snowflake's built-in Data Metric Functions on your most critical tables:
 
 ```sql
 -- Configure where DMF results are stored
-ALTER DATABASE HIIVE_AI SET DATA_METRIC_SCHEDULE_EVENT_TABLE = 'HIIVE_AI.MARKETPLACE_OPS.DMF_EVENTS';
+ALTER DATABASE HIIVE_COCO_HOL SET DATA_METRIC_SCHEDULE_EVENT_TABLE = 'HIIVE_COCO_HOL.<username>_OPS.DMF_EVENTS';
 
 -- Apply system DMFs to TRADE_EXECUTIONS
 ALTER TABLE TRADE_EXECUTIONS ADD DATA METRIC FUNCTION SNOWFLAKE.CORE.NULL_COUNT ON (compliance_status);
@@ -53,7 +66,7 @@ ALTER TABLE TRADE_EXECUTIONS SET DATA_METRIC_SCHEDULE = 'TRIGGER_ON_CHANGES';
 """)
 
 
-PROMPT_7_2 = """In HIIVE_AI.MARKETPLACE_OPS, create custom Data Metric Functions for anomaly detection specific to our marketplace operations.
+PROMPT_7_2 = """In your workshop schema in HIIVE_COCO_HOL, create custom Data Metric Functions for anomaly detection specific to our marketplace operations.
 
 1. Create a trade volume anomaly DMF (flags if today's volume is >2 standard deviations from the 30-day rolling average):
 
@@ -125,7 +138,7 @@ Creates business-specific anomaly detection that goes far beyond generic null ch
 """)
 
 
-PROMPT_7_3 = """In HIIVE_AI.MARKETPLACE_OPS, set up alerting on DMF results so anomalies trigger notifications automatically.
+PROMPT_7_3 = """In your workshop schema in HIIVE_COCO_HOL, set up alerting on DMF results so anomalies trigger notifications automatically.
 
 1. Query recent DMF results from the event table:
 SELECT 
@@ -134,17 +147,17 @@ SELECT
   VALUE,
   MEASUREMENT_TIME,
   TABLE_SCHEMA
-FROM HIIVE_AI.MARKETPLACE_OPS.DMF_EVENTS
+FROM DMF_EVENTS
 ORDER BY MEASUREMENT_TIME DESC
 LIMIT 20;
 
 2. Create an alert that fires when trade volume anomaly is detected:
 
 CREATE OR REPLACE ALERT trade_volume_alert
-  WAREHOUSE = HIIVE_WH
+  WAREHOUSE = HIIVE_COCO_HOL_WH
   SCHEDULE = 'USING CRON 0 * * * * America/Vancouver'
   IF (EXISTS (
-    SELECT 1 FROM HIIVE_AI.MARKETPLACE_OPS.DMF_EVENTS
+    SELECT 1 FROM DMF_EVENTS
     WHERE METRIC_NAME = 'TRADE_VOLUME_ANOMALY_CHECK'
       AND VALUE != 0
       AND MEASUREMENT_TIME > DATEADD(hour, -1, CURRENT_TIMESTAMP())
@@ -154,7 +167,7 @@ CREATE OR REPLACE ALERT trade_volume_alert
       'hiive_alerts',
       'data-team@hiive.com',
       'ALERT: Trade Volume Anomaly Detected',
-      'A trade volume anomaly was detected. Please investigate in HIIVE_AI.MARKETPLACE_OPS.DMF_EVENTS.'
+      'A trade volume anomaly was detected. Please investigate in the DMF_EVENTS table.'
     );
 
 3. Resume the alert:
@@ -167,7 +180,7 @@ SELECT
   VALUE,
   DATE_TRUNC('hour', MEASUREMENT_TIME) as hour,
   COUNT(*) as measurements
-FROM HIIVE_AI.MARKETPLACE_OPS.DMF_EVENTS
+FROM DMF_EVENTS
 GROUP BY 1, 2, 3, 4
 ORDER BY hour DESC;
 
@@ -180,7 +193,7 @@ Closes the loop from detection to notification:
 
 ```sql
 CREATE OR REPLACE ALERT trade_volume_alert
-  WAREHOUSE = HIIVE_WH
+  WAREHOUSE = HIIVE_COCO_HOL_WH
   SCHEDULE = 'USING CRON 0 * * * * America/Vancouver'
   IF (EXISTS (...))
   THEN CALL SYSTEM$SEND_EMAIL(...);
