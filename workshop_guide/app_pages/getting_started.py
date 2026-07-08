@@ -166,26 +166,42 @@ ALTER COMPUTE POOL HIIVE_COCO_HOL_COMPUTE_POOL SUSPEND;
 st.space("small")
 st.markdown("## :material/person: Attendee Prerequisites (Before You Start)")
 
-st.markdown("Confirm the following before the lab begins:")
+st.markdown("#### :material/laptop: What to bring / install before the session")
+with st.container(border=True):
+    st.markdown("""
+| Item | Details |
+|------|---------|
+| **Laptop with Chrome** | We'll be working in Snowsight (browser-based) for Blocks 1-3 |
+| **Snowflake account access** | You'll receive `HIIVE_COCO_HOL_ROLE` credentials from your admin before the session |
+| **Snowflake CLI** | `brew install snowflake-cli` (Mac) or [docs.snowflake.com/developer-guide/snowflake-cli](https://docs.snowflake.com/en/developer-guide/snowflake-cli/index) — needed for the CoCo plugin |
+| **VS Code** | With the **Snowflake extension** installed (search "Snowflake" in Extensions marketplace) |
+| **Claude Code CLI** (recommended) | Your team already has this — ensure it's up to date (`claude update`) |
 
-st.markdown("#### 1. Verify login")
+:material/info: **Blocks 1-3 use Cortex Code in Snowsight** (browser). The VS Code + CoCo plugin is covered in the Reference section and is optional for the hands-on portion but recommended for daily workflow after.
+""")
+
+st.space("small")
+
+st.markdown("#### :material/checklist: Verify your setup (day-of, before 10:00 AM)")
+
+st.markdown("##### 1. Verify login")
 with st.container(border=True):
     st.markdown("Log into **Snowsight** with your HIIVE credentials and confirm you have access.")
 
-st.markdown("#### 2. Check role")
+st.markdown("##### 2. Check role")
 with st.container(border=True):
     st.markdown("Confirm you have `HIIVE_COCO_HOL_ROLE` assigned:")
     st.code("""USE ROLE HIIVE_COCO_HOL_ROLE;
 USE WAREHOUSE HIIVE_COCO_HOL_WH;
 SELECT CURRENT_ROLE(), CURRENT_USER();""", language="sql")
 
-st.markdown("#### 3. Verify shared resources are visible")
+st.markdown("##### 3. Verify shared resources are visible")
 with st.container(border=True):
     st.markdown("Run the following to confirm the shared stage is accessible:")
     st.code("LIST @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES;", language="sql")
     st.markdown("You should see **10 CSV files** listed.")
 
-st.markdown("#### 4. Understand the naming convention")
+st.markdown("##### 4. Understand the naming convention")
 with st.container(border=True):
     st.markdown("""
 Your personal schema will be created automatically using your Snowflake username (e.g., if you're logged in as OLEG, your schema will be `HIIVE_COCO_HOL.OLEG_OPS`).
@@ -193,7 +209,7 @@ Your personal schema will be created automatically using your Snowflake username
 This prevents object collisions between attendees — everyone works in their own namespace.
 """)
 
-st.markdown("#### 5. Open Cortex Code")
+st.markdown("##### 5. Open Cortex Code")
 with st.container(border=True):
     st.markdown("""
 In Snowsight, open **Cortex Code** from the left navigation panel. This is where you'll paste all prompts from this workshop.
@@ -201,7 +217,7 @@ In Snowsight, open **Cortex Code** from the left navigation panel. This is where
 You can check and switch roles in the bottom-left of the Snowsight UI.
 """)
 
-st.markdown("#### 6. (Optional) VS Code Plugin")
+st.markdown("##### 6. (Optional) VS Code + CoCo Plugin")
 with st.container(border=True):
     st.markdown("""
 If you'd like to use Cortex Code from VS Code:
