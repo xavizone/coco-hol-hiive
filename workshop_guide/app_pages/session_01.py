@@ -1,7 +1,7 @@
 import streamlit as st
 from components import render_session_header, render_prompt, render_explanation, render_technologies_used, render_key_concepts, render_what_you_built
 
-render_session_header(1, "Data Prep", "10:00 - 10:25 AM", "25 min", "Personal schema created and 10 marketplace tables loaded from shared stage")
+render_session_header(1, "Data Prep", "10:05 - 10:20 AM", "15 min", "Personal schema created and 10 marketplace tables loaded from shared stage")
 
 render_technologies_used([
     {"name": "Schema & Stage", "description": "Each attendee creates their own schema (namespace) and personal stage inside the shared HIIVE_COCO_HOL database to avoid collisions with other participants.", "icon": "database"},
@@ -10,22 +10,15 @@ render_technologies_used([
 ])
 
 
-PROMPT_1_1 = """Create your personal schema for the workshop. Use CURRENT_USER() to name it automatically:
+PROMPT_1_1 = """Set me up for the HIIVE CoCo HOL workshop.
 
-1. Set session context:
-   USE ROLE HIIVE_COCO_HOL_ROLE;
-   USE WAREHOUSE HIIVE_COCO_HOL_WH;
-   USE DATABASE HIIVE_COCO_HOL;
+I need you to:
+1. Switch to the HIIVE_COCO_HOL_ROLE role and use the HIIVE_COCO_HOL_WH warehouse and HIIVE_COCO_HOL database
+2. Create a personal schema for me using my Snowflake username (CURRENT_USER()) with an _OPS suffix — so if I'm logged in as OLEG, the schema should be OLEG_OPS
+3. Inside that schema, create an internal stage called DATA with directory table enabled
+4. Copy all the workshop CSV files from the shared stage at HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES into my personal DATA stage
 
-2. Create your personal schema named after your Snowflake username:
-   CREATE SCHEMA IF NOT EXISTS IDENTIFIER(CURRENT_USER() || '_OPS');
-   USE SCHEMA IDENTIFIER(CURRENT_USER() || '_OPS');
-
-3. Create a personal stage and copy workshop data:
-   CREATE OR REPLACE STAGE DATA DIRECTORY = (ENABLE = TRUE) ENCRYPTION = (TYPE = 'SNOWFLAKE_SSE');
-   COPY FILES INTO @DATA FROM @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES;
-
-Execute all SQL and confirm."""
+Execute everything and confirm what was created."""
 
 render_prompt("Prompt 1.1", "Create Personal Schema & Stage", PROMPT_1_1)
 
@@ -54,17 +47,13 @@ COPY FILES INTO @DATA
 """)
 
 
-PROMPT_1_2 = """In your workshop schema in HIIVE_COCO_HOL, the 10 CSV files are now in your personal DATA stage.
+PROMPT_1_2 = """Now load my workshop data. The 10 CSV files are in my personal DATA stage.
 
-For all 10 tables (COMPANIES, SHAREHOLDERS, LISTINGS, TRADE_EXECUTIONS, PRICING_SIGNALS, PLATFORM_ACTIVITY, USER_SESSIONS, COMPLIANCE_REVIEWS, SUPPORT_TICKETS, REGULATORY_FILINGS):
+Create all 10 tables from these files: companies, shareholders, listings, trade_executions, pricing_signals, platform_activity, user_sessions, compliance_reviews, support_tickets, and regulatory_filings.
 
-1. Create a file format (CSV with PARSE_HEADER=TRUE, FIELD_OPTIONALLY_ENCLOSED_BY='"')
-2. Create the tables with appropriate column types inferred from the data. Ensure to convert the column names to uppercase.
-3. Load the data
+Use INFER_SCHEMA to automatically detect column types from the CSVs, create the tables, and load the data. Make sure the column names are uppercase. Use PARSE_HEADER=TRUE and FIELD_OPTIONALLY_ENCLOSED_BY='"' in the file format.
 
-Use CREATE TABLE with INFER_SCHEMA from a stage and then COPY INTO them. The key requirement is that all 10 tables are created and populated.
-
-Execute all SQL."""
+Execute everything and tell me how many rows loaded into each table."""
 
 st.markdown("""
 **Your personal stage already has the 10 CSV files** (copied in Prompt 1.1). Now we'll create tables and load the data.
@@ -111,7 +100,7 @@ COPY INTO COMPANIES
 """)
 
 
-PROMPT_1_3 = """Run a query in HIIVE_COCO_HOL that shows every table name and its row count in your schema, ordered by row count descending. Format it nicely."""
+PROMPT_1_3 = """Show me all the tables in my schema with their row counts, ordered from largest to smallest. Format it as a clean table."""
 
 render_prompt("Prompt 1.3", "Verify All Data Tables", PROMPT_1_3)
 

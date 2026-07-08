@@ -1,7 +1,7 @@
 import streamlit as st
 from components import render_session_header, render_prompt, render_explanation, render_technologies_used, render_key_concepts, render_what_you_built
 
-render_session_header(3, "Cortex Search", "10:55 - 11:20 AM", "25 min", "Knowledge base, Cortex Search service, and RAG query pattern")
+render_session_header(3, "Cortex Search", "10:35 - 10:45 AM", "10 min", "Knowledge base, Cortex Search service, and RAG query pattern")
 
 render_technologies_used([
     {"name": "Cortex Search Service", "description": "A managed hybrid search engine combining vector (semantic) and keyword search with automatic reranking. Created with a single SQL statement; handles embedding, indexing, and serving automatically.", "icon": "search"},
@@ -96,32 +96,14 @@ PROMPT_3_3 = """In your workshop schema in HIIVE_COCO_HOL, implement a RAG patte
 
 1. Takes a user question: "What are the most common compliance issues on the HIIVE platform and what preventive measures have been effective?"
 
-2. First retrieves the top 5 most relevant documents from marketplace_knowledge_search using SEARCH_PREVIEW (use the fully qualified service name in your schema)
+2. First retrieves the top 5 most relevant documents from your marketplace_knowledge_search service using SEARCH_PREVIEW
 
-3. Then passes the retrieved context + question to SNOWFLAKE.CORTEX.COMPLETE() to generate a grounded answer using the CTE pattern:
+3. Then passes the retrieved context + question to SNOWFLAKE.CORTEX.COMPLETE() to generate a grounded answer. Use this CTE pattern:
+   - search_results CTE: call SEARCH_PREVIEW on your service, get top 5 docs with columns doc_id, doc_type, content, metadata_category
+   - context CTE: use LATERAL FLATTEN + LISTAGG to combine results into a single context string
+   - Final SELECT: call CORTEX.COMPLETE with claude-sonnet-4-6, passing a system prompt that says "You are a compliance expert at HIIVE. Based ONLY on the following source documents, answer the user question. Cite specific documents by their doc_id."
 
-WITH search_results AS (
-    SELECT PARSE_JSON(
-        SNOWFLAKE.CORTEX.SEARCH_PREVIEW(
-            '<fully qualified service name>',
-            '{
-                "query": "common compliance issues preventive measures effectiveness",
-                "columns": ["doc_id", "doc_type", "content", "metadata_category"],
-                "limit": 5
-            }'
-        )
-    )['results'] AS results
-),
-context AS (
-    SELECT LISTAGG(r.value:content::STRING, '\\n\\n---\\n\\n') AS combined_context
-    FROM search_results, LATERAL FLATTEN(input => results) r
-)
-SELECT SNOWFLAKE.CORTEX.COMPLETE(
-    'claude-sonnet-4-6',
-    'You are a compliance expert at HIIVE... Based ONLY on the following source documents, answer the user question...'
-    || combined_context || '...'
-) AS rag_response
-FROM context;
+Note: For the SEARCH_PREVIEW service name, use the fully qualified path: your database.schema.service_name (e.g., HIIVE_COCO_HOL.OLEG_OPS.marketplace_knowledge_search)
 
 Execute and show the RAG response."""
 

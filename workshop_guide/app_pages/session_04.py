@@ -1,7 +1,7 @@
 import streamlit as st
 from components import render_session_header, render_prompt, render_explanation, render_technologies_used, render_key_concepts, render_what_you_built
 
-render_session_header(4, "Cortex Agents", "10:35 - 11:00 AM", "25 min", "Cortex Agent with Analyst + Search + custom tools")
+render_session_header(4, "Cortex Agents", "10:50 - 11:00 AM", "10 min", "Cortex Agent with Analyst + Search + custom tools")
 
 render_technologies_used([
     {"name": "Cortex Agent (CREATE AGENT)", "description": "An orchestrating AI that plans tasks, selects tools (Analyst, Search, custom), executes them, reflects on results, and generates responses. Created as a first-class Snowflake object.", "icon": "smart_toy"},

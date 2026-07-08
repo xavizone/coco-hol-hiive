@@ -1,7 +1,7 @@
 import streamlit as st
 from components import render_session_header, render_prompt, render_explanation, render_technologies_used, render_key_concepts, render_what_you_built
 
-render_session_header(6, "Streamlit", "11:15 - 11:30 AM", "15 min", "Operations dashboard with AI chat interface")
+render_session_header(6, "Streamlit", "11:05 - 11:10 AM", "5 min", "Operations dashboard with AI chat interface")
 
 render_technologies_used([
     {"name": "Streamlit in Snowflake (SiS)", "description": "Deploy Python-based data apps directly within Snowflake. Apps run on container runtime with full Python package support, access data natively via Snowpark, and inherit Snowflake's security model.", "icon": "web"},
@@ -22,9 +22,9 @@ Paste the prompts below into Cortex Code **within Workspaces** so the generated 
 
 PROMPT_6_1 = """In your workshop schema in HIIVE_COCO_HOL, create a Streamlit app that uses CURRENT_USER() || '_DASHBOARD' as the app name, running on the container runtime.
 
-Use the shared compute pool HIIVE_COCO_HOL_COMPUTE_POOL (already created by the admin).
+Use the shared compute pool HIIVE_COCO_HOL_COMPUTE_POOL and the pre-created external access integration HIIVE_COCO_HOL_PYPI_ACCESS (both already set up by the admin).
 
-Create the Streamlit app on that compute pool with these 2 pages:
+Create the Streamlit app with these 2 pages:
 
 PAGE 1 - Marketplace Dashboard:
 - KPI cards at the top showing: Total Trade Volume USD (from TRADE_EXECUTIONS), Active Listings (count with status 'active' from LISTINGS), Avg Execution Price (from TRADE_EXECUTIONS), Compliance Clearance Rate (% with status 'cleared' from COMPLIANCE_REVIEWS)
@@ -37,10 +37,8 @@ PAGE 2 - Marketplace Intelligence Chat:
 - Uses our MARKETPLACE_OPS_AGENT via SNOWFLAKE.CORTEX.AGENT() to answer questions
 - Has a sidebar showing summary stats: total trades, active listings, companies tracked
 
-Important for container runtime:
-- Create an External Access Integration that allows access to pypi.org and files.pythonhosted.org
-- Create a network rule for these hosts, then an integration referencing it
-- Set EXTERNAL_ACCESS_INTEGRATIONS on the Streamlit app
+Important:
+- Use the EXTERNAL_ACCESS_INTEGRATIONS = (HIIVE_COCO_HOL_PYPI_ACCESS) setting on the app
 - Include a pyproject.toml with dependencies: ["streamlit[snowflake]>=1.50.0", "plotly"]
 - Use st.connection("snowflake") for the Snowflake connection
 - Make it visually clean with st.columns for layout
