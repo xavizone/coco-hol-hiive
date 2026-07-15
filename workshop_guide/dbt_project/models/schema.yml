@@ -1,0 +1,36 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: "{{ target.schema }}"
+    tables:
+      - name: TRADE_EXECUTIONS
+      - name: LISTINGS
+      - name: COMPANIES
+
+models:
+  - name: stg_trades
+    description: "Cleaned trade execution records"
+    columns:
+      - name: trade_id
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_listings
+    description: "Cleaned marketplace listings with active flag"
+    columns:
+      - name: listing_id
+        tests:
+          - unique
+          - not_null
+
+  - name: mart_company_performance
+    description: "Company-level performance metrics aggregating trades and listings"
+    config:
+      materialized: table
+    columns:
+      - name: company_id
+        tests:
+          - unique
+          - not_null

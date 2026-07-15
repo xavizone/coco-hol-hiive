@@ -1,0 +1,11 @@
+default:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      account: "hiive_account"
+      role: HIIVE_COCO_HOL_ROLE
+      warehouse: HIIVE_COCO_HOL_WH
+      database: HIIVE_COCO_HOL
+      schema: "{{ target.schema }}"
+      threads: 4

@@ -1,0 +1,13 @@
+name: hiive_marketplace
+version: '1.0.0'
+profile: default
+model-paths: ["models"]
+target-path: "target"
+clean-targets: ["target"]
+
+models:
+  hiive_marketplace:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table

@@ -8,6 +8,7 @@ SESSION_PROMPTS = {
     5: [],
     6: ["Prompt 6.1", "Prompt 6.2"],
     7: ["Prompt 7.1", "Prompt 7.2", "Prompt 7.3"],
+    8: ["Prompt 8a.1", "Prompt 8a.2", "Prompt 8a.3", "Prompt 8a.4", "Prompt 8b.1", "Prompt 8b.2", "Prompt 8b.3", "Prompt 8b.4"],
 }
 
 

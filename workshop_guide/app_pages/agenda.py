@@ -12,7 +12,8 @@ AGENDA = [
     ("11:00 - 11:05 AM", "Session 5: CoWork", "5 min", "5"),
     ("11:05 - 11:10 AM", "Session 6: Streamlit", "5 min", "6"),
     ("11:10 - 11:25 AM", "Session 7: DMF & Monitoring", "15 min", "7"),
-    ("11:25 - 11:30 AM", ":gray[Wrap-up & Q&A]", None, None),
+    ("11:25 - 11:45 AM", "Session 8: dbt Projects", "20 min", "8"),
+    ("11:45 - 11:50 AM", ":gray[Wrap-up & Q&A]", None, None),
 ]
 
 for time, title, duration, session_num in AGENDA:
@@ -42,6 +43,7 @@ st.markdown("""
 | **Streamlit Apps** | 1 | Operations dashboard with AI chat |
 | **Data Metric Functions** | 6 | System DMFs + custom anomaly detection |
 | **Alerts** | 1 | Trade volume anomaly alert |
+| **dbt Projects** | 1 | Native Snowflake dbt project with staging + mart models |
 """)
 
 st.space("small")
