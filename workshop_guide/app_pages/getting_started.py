@@ -18,35 +18,37 @@ The admin creates the shared database, warehouse, stage, and role that all atten
 Run the following SQL as **ACCOUNTADMIN** (or a role with sufficient privileges):
 """)
 
-    st.code("""-- 1. Create the shared database
-CREATE DATABASE IF NOT EXISTS HIIVE_COCO_HOL;
-
--- 2. Create a shared schema for common resources
-CREATE SCHEMA IF NOT EXISTS HIIVE_COCO_HOL.SHARED_DATA;
-
--- 3. Create the workshop warehouse
+    st.code("""-- 1. Create the workshop warehouse
 CREATE WAREHOUSE IF NOT EXISTS HIIVE_COCO_HOL_WH
   WAREHOUSE_SIZE = 'MEDIUM'
   AUTO_SUSPEND = 60
   AUTO_RESUME = TRUE;
 
+-- 2. Create the shared database
+CREATE DATABASE IF NOT EXISTS HIIVE_COCO_HOL;
+
+-- 3. Create a shared schema for common resources
+CREATE SCHEMA IF NOT EXISTS HIIVE_COCO_HOL.SHARED_DATA;
+
 -- 4. Create a shared stage and upload the 10 CSV files
--- Download CSVs from: https://github.com/xavizone/coco-hol-hiive/tree/main/workshop_guide/data
+-- Download CSVs to a local folder from: https://github.com/xavizone/coco-hol-hiive/tree/main/workshop_guide/data
 CREATE OR REPLACE STAGE HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES
   DIRECTORY = (ENABLE = TRUE)
   ENCRYPTION = (TYPE = 'SNOWFLAKE_SSE');
 
--- Upload all 10 CSV files to this stage via Snowsight UI or SnowSQL:
--- PUT file://./companies.csv @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES;
--- PUT file://./shareholders.csv @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES;
--- PUT file://./listings.csv @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES;
--- PUT file://./trade_executions.csv @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES;
--- PUT file://./pricing_signals.csv @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES;
--- PUT file://./platform_activity.csv @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES;
--- PUT file://./user_sessions.csv @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES;
--- PUT file://./compliance_reviews.csv @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES;
--- PUT file://./support_tickets.csv @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES;
--- PUT file://./regulatory_filings.csv @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES;
+-- Option 1: Snowsight UI — drag and drop the 10 CSV files into the stage (use database explorer to navigate to the stage)
+-- Option 2: SnowSQL — Run the below commands to upload the files (replace `<path_to_csvs>` with your local path):            
+  -- Tip: You can also use a wildcard (e.g., `file://<path_to_csvs>/*.csv`) to upload all CSVs at once.
+-- PUT 'file://<folder_path_to_csvs>/companies.csv' @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES;
+-- PUT 'file://<folder_path_to_csvs>/shareholders.csv' @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES;
+-- PUT 'file://<folder_path_to_csvs>/listings.csv' @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES;
+-- PUT 'file://<folder_path_to_csvs>/trade_executions.csv' @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES;
+-- PUT 'file://<folder_path_to_csvs>/pricing_signals.csv' @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES;
+-- PUT 'file://<folder_path_to_csvs>/platform_activity.csv' @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES;
+-- PUT 'file://<folder_path_to_csvs>/user_sessions.csv' @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES;
+-- PUT 'file://<folder_path_to_csvs>/compliance_reviews.csv' @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES;
+-- PUT 'file://<folder_path_to_csvs>/support_tickets.csv' @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES;
+-- PUT 'file://<folder_path_to_csvs>/regulatory_filings.csv' @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES;
 
 -- 5. Create a workshop role and grant privileges
 CREATE ROLE IF NOT EXISTS HIIVE_COCO_HOL_ROLE;
