@@ -392,10 +392,21 @@ ALTER DBT PROJECT HIIVE_MARKETPLACE SET DEFAULT_VERSION = 'VERSION$1';
 
 
 render_key_concepts([
-    {"term": "Migration Path", "definition": "What changes: profiles.yml (remove auth fields), dbt_project.yml (replace env_var with literals). What stays: ALL SQL models, tests, schema.yml — zero modifications needed. The entire transformation logic is portable as-is."},
+    {"term": "Migration Path", "definition": "What changes: profiles.yml (remove auth fields), dbt_project.yml (replace env_var with literals). What stays: ALL SQL models, tests, schema.yml \u2014 zero modifications needed. The entire transformation logic is portable as-is."},
     {"term": "EXECUTE DBT PROJECT", "definition": "Native SQL command that runs dbt on Snowflake warehouse compute. Supports build, run, test, and seed. No external runner or CI system needed. The warehouse handles compute, and the session handles auth."},
     {"term": "Versioned Deployments", "definition": "Each `snow dbt deploy` creates VERSION$1, $2, etc. Rollback = change default version with one ALTER statement. No git revert needed, no waiting for CI to re-run. Instant rollback with audit trail."},
     {"term": "Snowflake Task Scheduling", "definition": "Same Task infrastructure used elsewhere in Snowflake (Dynamic Tables, Streams, etc.). Replaces GitHub Actions CRON triggers entirely. One SQL statement replaces an entire workflow YAML file plus runner infrastructure."},
+    {"term": "dbt show (Preview)", "definition": "Native command that previews model output WITHOUT materializing any objects. Impossible with standard dbt run \u2014 you always have to create/replace tables to see results. A key differentiator for development and validation workflows."},
+    {"term": "Task Chains", "definition": "Snowflake Tasks with AFTER dependencies create execution DAGs. Run \u2192 test \u2192 notify mirrors GitHub Actions step sequencing but with native guarantees, no external dependencies, and unified monitoring."},
+])
+
+render_what_you_built([
+    "HIIVE_MARKETPLACE dbt project deployed natively to Snowflake",
+    "3 dbt models materialized (2 staging views, 1 mart table)",
+    "DBT_HOURLY_BUILD Snowflake Task replacing GitHub Actions",
+    "Monitoring queries for execution history and project versions",
+    "Production task chain (run \u2192 test) with AFTER dependency",
+    "Versioned deployment with instant rollback capability",
 ])
 
 render_what_you_built([

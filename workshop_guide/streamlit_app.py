@@ -45,6 +45,7 @@ page = st.navigation(
         ],
         "Block 4: Data Pipelines": [
             st.Page("app_pages/session_08.py", title=_title(8, "dbt Projects"), icon=":material/transform:"),
+            st.Page("app_pages/session_09.py", title=_title(9, "dbt Projects (Hands-On)"), icon=":material/terminal:"),
         ],
         "Reference": [
             st.Page("app_pages/reference_coco.py", title="Cortex Code Plugin", icon=":material/extension:"),
