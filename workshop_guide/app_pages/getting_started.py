@@ -43,7 +43,7 @@ CREATE OR REPLACE STAGE HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES
 
 -- Option 1: Snowsight UI — drag and drop the 10 CSV files into the stage (use database explorer to navigate to the stage)
 
--- Option 2: SnowSQL — Run the below commands to upload the files (replace `<path_to_csvs>` with your local path):            
+-- Option 2: SnowSQL — Run the below commands to upload the files (replace `<path_to_csvs>` with your local path)           
   -- Tip: You can also use a wildcard (e.g., `file://<path_to_csvs>/*.csv`) to upload all CSVs at once.
     -- PUT 'file://<folder_path_to_csvs>/companies.csv' @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES;
     -- PUT 'file://<folder_path_to_csvs>/shareholders.csv' @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES;
@@ -90,7 +90,7 @@ GRANT CREATE SNOWFLAKE.ML.ANOMALY_DETECTION ON SCHEMA HIIVE_COCO_HOL.SHARED_DATA
 
 -- Grant per-user schema privileges (these apply once users create their schemas)
 -- Users need: CREATE TABLE, CREATE VIEW, CREATE STAGE, CREATE FUNCTION,
--- CREATE CORTEX SEARCH SERVICE, CREATE STREAMLIT in their own schemas
+-- CREATE CORTEX SEARCH SERVICE, CREATE STREAMLIT, CREATE DBT PROJECT, CREATE TASK in their own schemas
 -- CREATE SCHEMA already grants these implicitly on schemas the role creates
 
 -- 8. Grant the workshop role to each attendee (run once per user)
@@ -108,7 +108,52 @@ ALTER ACCOUNT SET CORTEX_ENABLED_CROSS_REGION = 'ANY_REGION';""", language="sql"
 """)
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Section A.1: Cleanup Script
+# Section A.1: Session 8 (dbt Projects) Setup
+# ─────────────────────────────────────────────────────────────────────────────
+
+st.space("small")
+
+st.markdown("#### :material/transform: Session 8 Setup: dbt Project Files")
+
+with st.container(border=True):
+    st.markdown("""
+**For Option A (Pre-built from Stage):** Upload the workshop dbt project files to the shared stage so attendees can copy and deploy them. This step is **not required** if you plan to use Option B (where Cortex Code generates the dbt project live).
+
+Download the `dbt_project/` folder from:
+[github.com/xavizone/coco-hol-hiive/tree/main/workshop_guide/dbt_project](https://github.com/xavizone/coco-hol-hiive/tree/main/workshop_guide/dbt_project)
+""")
+
+    st.code("""-- Upload dbt project files to shared stage (preserving folder structure)
+-- Run as ACCOUNTADMIN or a role with WRITE access to the stage
+-- Replace `<local_path>/local_folder_path` with the local path to the downloaded `dbt_project/` folder
+-- **Loading the dbt project filescan be done in two ways:**
+
+-- Option 1: Snowsight UI — drag and drop (use database explorer to navigate to the stage)
+
+-- Option 2: Use SnowSQL — Run the below commands to upload the files (replace `<path_to_csvs>` with your local path)           
+    -- These commands preserve the folder structure in the stage so that dbt can find the files correctly.
+    -- Commands work only if the local folder structure matches the dbt project structure (e.g., `dbt_project.yml` at root, `models/` subfolder, etc.)
+    -- Tip: You can also use a wildcard (e.g., `file://<local_folder_path>/models/**/*.sql`) to upload all SQL files at once.
+    -- These commands work only in SnowSQL or Snowsight SQL editor, not in the CoCo plugin.
+        PUT 'file://<local_folder_path>/dbt_project.yml' @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES/dbt_project/;
+        PUT 'file://<local_folder_path>/profiles.yml' @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES/dbt_project/;
+        PUT 'file://<local_folder_path>/models/schema.yml' @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES/dbt_project/models/;
+        PUT 'file://<local_folder_path>/models/staging/stg_trades.sql' @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES/dbt_project/models/staging/;
+        PUT 'file://<local_folder_path>/models/staging/stg_listings.sql' @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES/dbt_project/models/staging/;
+        PUT 'file://<local_folder_path>/models/marts/mart_company_performance.sql' @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES/dbt_project/models/marts/;
+
+-- Verify upload
+LIST @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES/dbt_project/;
+-- Should show 6 files across the folder structure""", language="sql")
+
+    st.markdown("""
+**Verify:** `LIST @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES/dbt_project/` should return 6 files.
+
+**Note:** The `HIIVE_COCO_HOL_ROLE` already has READ access to the shared stage (granted in the main setup above). No additional grants are needed — attendees can copy files from this stage to their personal stage and deploy using `snow dbt deploy`.
+""")
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Section A.2: Cleanup Script
 # ─────────────────────────────────────────────────────────────────────────────
 
 st.space("small")
@@ -239,7 +284,33 @@ If you'd like to use Cortex Code from VS Code:
 
 See the **Reference** page in the sidebar for full setup details.
 
-:material/warning: **Cloudflare VPN note**: If you encounter SSL certificate issues, you may need to set `insecure_mode = true` in your connection config or add Cloudflare's root cert to the trust store.
+:material/warning: **Cloudflare VPN note**: If you're behind Cloudflare VPN and see SSL certificate errors, add `insecure_mode = true` under your connection block in `~/.snowflake/connections.toml`:
+
+```toml
+[default]
+insecure_mode = true
+```
+
+This disables certificate verification for that connection. Remove it once you're off the VPN or the cert issue is resolved.
+""")
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Section C: Troubleshooting
+# ─────────────────────────────────────────────────────────────────────────────
+
+st.space("small")
+
+st.markdown("## :material/build: If Something Doesn't Work")
+
+with st.container(border=True):
+    st.markdown("""
+| Problem | Fix |
+|---------|-----|
+| **Can't see the role** | Ask your admin (Lauren) to run `GRANT ROLE HIIVE_COCO_HOL_ROLE TO USER <your_username>;` |
+| **SSL/VPN certificate errors** | Open `~/.snowflake/connections.toml` and add `insecure_mode = true` under your connection block (see VS Code section above for example) |
+| **Cortex Code not appearing in Snowsight** | Ensure you're on the correct role (`HIIVE_COCO_HOL_ROLE`) — check bottom-left of Snowsight UI |
+| **CLI install issues** | The lab works entirely in-browser via Snowsight. CLI is only needed for the optional VS Code plugin. |
+| **"Object does not exist" errors** | Make sure you ran Session 1 prompts first — they create your personal schema and tables |
 """)
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -254,6 +325,6 @@ st.markdown("#### Quick reference")
 col1, col2, col3 = st.columns(3)
 col1.metric("Role", "HIIVE_COCO_HOL_ROLE", help="Pre-assigned by admin")
 col2.metric("Warehouse", "HIIVE_COCO_HOL_WH", help="Shared Medium warehouse")
-col3.metric("Duration", "90 min", help="Starting at 10:00 AM")
+col3.metric("Duration", "110 min", help="10:00 AM - 11:50 AM")
 
 st.caption("All prompts build sequentially — run them in order. Once you've confirmed access, you're ready to start Session 1.")

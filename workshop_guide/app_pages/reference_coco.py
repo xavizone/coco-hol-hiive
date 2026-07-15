@@ -44,7 +44,14 @@ database = "HIIVE_COCO_HOL"
 schema = ""  # Leave blank - set per session
 """, language="toml")
     st.markdown("""
-:material/warning: **Cloudflare VPN note**: If you hit SSL certificate issues, you may need to set `insecure_mode = true` in your connection config or add Cloudflare's root cert to the trust store.
+:material/warning: **Cloudflare VPN note**: If you're behind Cloudflare VPN and see SSL certificate errors, add `insecure_mode = true` under your connection block in `~/.snowflake/connections.toml`:
+
+```toml
+[default]
+insecure_mode = true
+```
+
+This disables certificate verification for that connection. Remove it once you're off the VPN or the cert issue is resolved.
 """)
 
 st.space("small")

@@ -6,7 +6,7 @@
 
 Hi team,
 
-We have a 90-minute hands-on lab with the Snowflake team on **July 16 at 10:00 AM** at the HIIVE office. The session covers Cortex Code (CoCo), Semantic Views, Cortex Search, Cortex Agents, and Data Metric Functions for proactive monitoring.
+We have a hands-on lab with the Snowflake team on **July 16 at 10:00 AM** at the HIIVE office. The session covers Cortex Code (CoCo), Semantic Views, Cortex Search, Cortex Agents, Data Metric Functions for proactive monitoring, and **dbt Projects in Snowflake** (native alternative to GitHub Actions).
 
 Below is what's needed from **Lauren (or whoever is running admin setup)** and what **each attendee** should have ready before we start.
 
@@ -26,6 +26,11 @@ Run these **before July 16** so the environment is ready when attendees arrive.
 > https://github.com/xavizone/coco-hol-hiive/tree/main/workshop_guide/data
 >
 > Download all 10 CSV files from the link above. You'll upload them to the shared stage in step 4.
+
+**Step 0b — Download the dbt project files (for Session 8, Option A):**
+> https://github.com/xavizone/coco-hol-hiive/tree/main/workshop_guide/dbt_project
+>
+> Download the entire `dbt_project/` folder. You'll upload it to the shared stage in step 5b. (Skip this if you plan to use Option B where Cortex Code generates the project live.)
 
 ```sql
 -- 1. Create shared database
@@ -66,6 +71,15 @@ GRANT CREATE SCHEMA ON DATABASE HIIVE_COCO_HOL TO ROLE HIIVE_COCO_HOL_ROLE;
 GRANT USAGE ON WAREHOUSE HIIVE_COCO_HOL_WH TO ROLE HIIVE_COCO_HOL_ROLE;
 GRANT DATABASE ROLE SNOWFLAKE.CORTEX_USER TO ROLE HIIVE_COCO_HOL_ROLE;
 
+-- 5b. Session 8 (dbt Projects): Upload dbt project files to shared stage
+-- Download from: https://github.com/xavizone/coco-hol-hiive/tree/main/workshop_guide/dbt_project
+-- PUT file://./dbt_project/dbt_project.yml @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES/dbt_project/;
+-- PUT file://./dbt_project/profiles.yml @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES/dbt_project/;
+-- PUT file://./dbt_project/models/schema.yml @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES/dbt_project/models/;
+-- PUT file://./dbt_project/models/staging/stg_trades.sql @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES/dbt_project/models/staging/;
+-- PUT file://./dbt_project/models/staging/stg_listings.sql @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES/dbt_project/models/staging/;
+-- PUT file://./dbt_project/models/marts/mart_company_performance.sql @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES/dbt_project/models/marts/;
+
 -- 6. Grant role to each attendee
 GRANT ROLE HIIVE_COCO_HOL_ROLE TO USER OLEG;
 GRANT ROLE HIIVE_COCO_HOL_ROLE TO USER LAUREN;
@@ -101,10 +115,11 @@ ALTER ACCOUNT SET CORTEX_ENABLED_CROSS_REGION = 'ANY_REGION';
 
 - [ ] Run the setup script above as ACCOUNTADMIN
 - [ ] Upload all 10 CSV files to the shared stage
-- [ ] Verify `LIST @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES` shows 10 files
+- [ ] Upload the dbt_project/ folder to the shared stage (for Session 8, Option A)
+- [ ] Verify `LIST @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES` shows 10 CSVs + 6 dbt project files
 - [ ] Confirm each attendee can `USE ROLE HIIVE_COCO_HOL_ROLE` successfully
 - [ ] (Recommended) Discuss Enterprise Edition upgrade with Snowflake team for full DMF hands-on
-- [ ] Check Cortex Code works through Cloudflare VPN (known SSL cert issue — may need trust store update)
+- [ ] Check Cortex Code works through Cloudflare VPN (if SSL cert errors occur, attendees add `insecure_mode = true` in `~/.snowflake/connections.toml`)
 
 ---
 
@@ -139,18 +154,25 @@ ALTER ACCOUNT SET CORTEX_ENABLED_CROSS_REGION = 'ANY_REGION';
 ### If something doesn't work
 
 - Can't see the role → ask Lauren to run the GRANT for your username
-- SSL/VPN issues with Cortex Code → set `insecure_mode = true` in your Snowflake connection config
+- SSL/VPN issues with Cortex Code → If you're behind Cloudflare VPN and see SSL certificate errors, open `~/.snowflake/connections.toml` and add `insecure_mode = true` under your connection (e.g., `[default]`). This disables certificate verification for that connection. Example:
+  ```toml
+  [default]
+  account = "your_account"
+  user = "your_user"
+  insecure_mode = true
+  ```
 - CLI install issues → the lab works entirely in-browser; CLI is only needed for VS Code plugin (optional)
 
 ---
 
-## What we'll cover (90 min)
+## What we'll cover (~110 min)
 
 | Block | Sessions | What you'll build |
 |-------|----------|-------------------|
 | **Block 1: Data & Intelligence** | Data Prep, Semantic Views, Cortex Search | 10 tables, a semantic view, a search service, and a RAG pipeline |
 | **Block 2: Agents & Apps** | Cortex Agents, CoWork, Streamlit | An AI agent, collaborative analysis, and a live dashboard |
 | **Block 3: Monitoring** | DMFs & Alerts | Anomaly detection DMFs and alerting (demo if Standard Edition) |
+| **Block 4: Data Pipelines** | dbt Projects | Native Snowflake dbt project — deploy, execute, and schedule (replaces GitHub Actions) |
 
 ### Edition note
 
