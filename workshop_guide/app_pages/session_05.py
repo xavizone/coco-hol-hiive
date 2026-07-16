@@ -1,5 +1,5 @@
 import streamlit as st
-from components import render_session_header, render_explanation, render_technologies_used, render_key_concepts, render_what_you_built
+from components import render_session_header, render_explanation, render_technologies_used, render_key_concepts, render_what_you_built, render_docs_links, render_execution_context
 
 render_session_header(5, "CoWork", "11:00 - 11:05 AM", "5 min", "Collaborative AI analysis with CoWork")
 
@@ -9,16 +9,24 @@ render_technologies_used([
     {"name": "Sharing & Collaboration", "description": "CoWork sessions can be shared with team members, creating a collaborative space for data exploration and decision-making.", "icon": "share"},
 ])
 
+st.markdown("""
+> **Context check:** CoWork uses your active Snowsight role and warehouse. Before opening CoWork, make sure your Snowsight session context (top-left selector) is set to `HIIVE_COCO_HOL_ROLE`, `HIIVE_COCO_HOL_WH`, and `HIIVE_COCO_HOL` database. CoWork will automatically discover your tables in your personal schema.
+""")
+
+render_execution_context("snowsight")
+
 st.markdown("---")
 
 st.markdown("#### :material/open_in_new: Open CoWork")
 with st.container(border=True):
     st.markdown("""
-In Snowsight, click **CoWork** in the left navigation panel. Start a new conversation.
+In Snowsight, click **CoWork** (or **Snowflake Intelligence**) in the left navigation panel. Start a new conversation.
 
 CoWork provides a chat-based interface that can query your Snowflake data, create charts, and generate insights — no SQL required. It discovers your tables in your personal schema (`HIIVE_COCO_HOL.<username>_OPS`) automatically.
 
 Paste each question below into CoWork one at a time and observe how it generates queries and visualizations.
+
+> **Tip:** If CoWork asks which tables to use, point it to your personal schema. You can also connect your `MARKETPLACE_OPS_AGENT` agent to CoWork for an enhanced experience with tool routing.
 """)
 
 st.space("small")
@@ -75,6 +83,11 @@ render_key_concepts([
     {"term": "CoWork", "definition": "Snowflake's collaborative AI workspace for data exploration. Provides a conversational interface that queries data, creates visualizations, and generates insights. Designed for business analysts and team collaboration."},
     {"term": "Collaborative Intelligence", "definition": "The pattern where AI assists a team in making decisions together. CoWork sessions can be shared, allowing multiple people to ask questions, build on each other's analysis, and reach conclusions collectively."},
     {"term": "Context Maintenance", "definition": "CoWork maintains conversation history so follow-up questions build on previous analysis. Ask 'Show me trade volume by sector' then 'Now filter to just Q4' — it remembers the context."},
+])
+
+render_docs_links([
+    {"title": "Snowflake CoWork", "url": "https://docs.snowflake.com/en/user-guide/ui-snowsight/cowork"},
+    {"title": "Cortex Analyst", "url": "https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-analyst"},
 ])
 
 render_what_you_built([

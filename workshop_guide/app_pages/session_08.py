@@ -1,5 +1,5 @@
 import streamlit as st
-from components import render_session_header, render_prompt, render_explanation, render_technologies_used, render_key_concepts, render_what_you_built
+from components import render_session_header, render_prompt, render_explanation, render_technologies_used, render_key_concepts, render_what_you_built, render_docs_links, render_execution_context
 
 render_session_header(8, "dbt Projects", "11:25 - 11:45 AM", "20 min", "Migrate, deploy, execute, and schedule a dbt project natively in Snowflake")
 
@@ -28,6 +28,8 @@ Your SQL models stay exactly the same — zero changes. Only the orchestration l
 """)
 
 st.markdown("---")
+
+st.caption(":material/terminal: Commands prefixed with `snow` require the **Snowflake CLI**. SQL commands (CREATE TASK, EXECUTE DBT PROJECT) can run in **Snowsight** or **Cortex Code**.")
 
 # Define shared prompts (identical across both options)
 PROMPT_8_2 = """Run our deployed HIIVE_MARKETPLACE dbt project. I need you to:
@@ -392,12 +394,19 @@ ALTER DBT PROJECT HIIVE_MARKETPLACE SET DEFAULT_VERSION = 'VERSION$1';
 
 
 render_key_concepts([
-    {"term": "Migration Path", "definition": "What changes: profiles.yml (remove auth fields), dbt_project.yml (replace env_var with literals). What stays: ALL SQL models, tests, schema.yml \u2014 zero modifications needed. The entire transformation logic is portable as-is."},
+    {"term": "Migration Path", "definition": "What changes: profiles.yml (remove auth fields), dbt_project.yml (replace env_var with literals). What stays: ALL SQL models, tests, schema.yml — zero modifications needed. The entire transformation logic is portable as-is."},
     {"term": "EXECUTE DBT PROJECT", "definition": "Native SQL command that runs dbt on Snowflake warehouse compute. Supports build, run, test, and seed. No external runner or CI system needed. The warehouse handles compute, and the session handles auth."},
     {"term": "Versioned Deployments", "definition": "Each `snow dbt deploy` creates VERSION$1, $2, etc. Rollback = change default version with one ALTER statement. No git revert needed, no waiting for CI to re-run. Instant rollback with audit trail."},
     {"term": "Snowflake Task Scheduling", "definition": "Same Task infrastructure used elsewhere in Snowflake (Dynamic Tables, Streams, etc.). Replaces GitHub Actions CRON triggers entirely. One SQL statement replaces an entire workflow YAML file plus runner infrastructure."},
-    {"term": "dbt show (Preview)", "definition": "Native command that previews model output WITHOUT materializing any objects. Impossible with standard dbt run \u2014 you always have to create/replace tables to see results. A key differentiator for development and validation workflows."},
-    {"term": "Task Chains", "definition": "Snowflake Tasks with AFTER dependencies create execution DAGs. Run \u2192 test \u2192 notify mirrors GitHub Actions step sequencing but with native guarantees, no external dependencies, and unified monitoring."},
+    {"term": "dbt show (Preview)", "definition": "Native command that previews model output WITHOUT materializing any objects. Impossible with standard dbt run — you always have to create/replace tables to see results. A key differentiator for development and validation workflows."},
+    {"term": "Task Chains", "definition": "Snowflake Tasks with AFTER dependencies create execution DAGs. Run → test → notify mirrors GitHub Actions step sequencing but with native guarantees, no external dependencies, and unified monitoring."},
+])
+
+render_docs_links([
+    {"title": "dbt Projects on Snowflake", "url": "https://docs.snowflake.com/en/developer-guide/dbt/dbt-snowflake"},
+    {"title": "snow dbt deploy", "url": "https://docs.snowflake.com/en/developer-guide/snowflake-cli/dbt/overview"},
+    {"title": "EXECUTE DBT PROJECT", "url": "https://docs.snowflake.com/en/sql-reference/sql/execute-dbt-project"},
+    {"title": "Snowflake Tasks", "url": "https://docs.snowflake.com/en/user-guide/tasks-intro"},
 ])
 
 render_what_you_built([

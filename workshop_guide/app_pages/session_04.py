@@ -1,5 +1,5 @@
 import streamlit as st
-from components import render_session_header, render_prompt, render_explanation, render_technologies_used, render_key_concepts, render_what_you_built
+from components import render_session_header, render_prompt, render_explanation, render_technologies_used, render_key_concepts, render_what_you_built, render_docs_links, render_execution_context
 
 render_session_header(4, "Cortex Agents", "10:50 - 11:00 AM", "10 min", "Cortex Agent with Analyst + Search + custom tools")
 
@@ -9,88 +9,140 @@ render_technologies_used([
     {"name": "Custom Tools (UDFs)", "description": "User-defined functions that extend Agent capabilities. The Agent can call any SQL UDF as a tool, enabling custom business logic and calculations.", "icon": "build"},
 ])
 
+st.markdown("""
+> **Context check:** Verify your session is using `HIIVE_COCO_HOL_ROLE`, `HIIVE_COCO_HOL_WH`, and `HIIVE_COCO_HOL` database with your personal schema. If anything looks off, run:
+> ```sql
+> USE ROLE HIIVE_COCO_HOL_ROLE;
+> USE WAREHOUSE HIIVE_COCO_HOL_WH;
+> USE DATABASE HIIVE_COCO_HOL;
+> USE SCHEMA <YOUR_USERNAME>_OPS;
+> ```
+""")
 
-PROMPT_4_1 = """In your workshop schema in HIIVE_COCO_HOL, create a Cortex Agent called MARKETPLACE_OPS_AGENT that marketplace operations staff can use to ask questions about both structured data and unstructured documents.
+render_execution_context("cortex_code")
 
-It should:
+
+PROMPT_4_1 = """You are a Cortex Agent expert with full knowledge of the latest CREATE AGENT DDL syntax. In my workshop schema in HIIVE_COCO_HOL, create a Cortex Agent called MARKETPLACE_OPS_AGENT that marketplace operations staff can use to ask questions about both structured data and unstructured documents.
+
+The agent spec uses a YAML format within FROM SPECIFICATION $$...$$. Key structural rules:
+- models: section with orchestration: auto
+- tools: list of tool_spec entries (type, name, description)
+- tool_resources: TOP-LEVEL key (not nested under each tool), keyed by tool name
+  - For cortex_analyst_text_to_sql: needs semantic_view and execution_environment (type: warehouse, warehouse: HIIVE_COCO_HOL_WH)
+  - For cortex_search: needs search_service (not cortex_search_service)
+- instructions: has sub-keys orchestration: and response:
+- sample_questions: nested under instructions, uses format: - question: "..."
+
+The agent should:
 - Use auto as the orchestration model
-- Have two tools: the MARKETPLACE_ANALYTICS_VIEW semantic view (for structured data queries) and the marketplace_knowledge_search Cortex Search service (for compliance docs and support tickets)
-- Include instructions that define it as the HIIVE Marketplace Operations Assistant, guiding it to:
-  - Route structured data questions (volumes, prices, metrics) to the analytics tool
-  - Route compliance/regulatory/support questions to the search tool
-  - Key domain context: HIIVE is a private securities marketplace for pre-IPO/secondary share trading. ROFR = Right of First Refusal. 409A = fair market value. Accredited investors only.
-  - Support English queries
-- Include 3-4 sample questions that span both tools (e.g. trade volumes, compliance reviews, pricing trends)
+- Have two tools:
+  - marketplace_analytics (cortex_analyst_text_to_sql) using the MARKETPLACE_ANALYTICS_VIEW semantic view
+  - marketplace_knowledge (cortex_search) using the MARKETPLACE_KNOWLEDGE_SEARCH service
+- Instructions should define it as the HIIVE Marketplace Operations Assistant with:
+  - Tool routing: structured data questions to analytics, compliance/regulatory/support to search
+  - Domain context: HIIVE is a pre-IPO secondary trading platform. ROFR, 409A, accredited investors
+- Include 3-4 sample questions spanning both tools
 
-Execute and show confirmation."""
+Execute and confirm with DESCRIBE AGENT or SHOW AGENTS."""
 
 render_prompt("Prompt 4.1", "Create the Cortex Agent", PROMPT_4_1)
 
 render_explanation("What this prompt does", """
-Creates a **Cortex Agent** — an AI orchestrator that combines multiple data tools:
+Creates a **Cortex Agent** — an AI orchestrator that combines multiple data tools.
 
-**CREATE AGENT anatomy**:
+**CREATE AGENT YAML structure** (this is the exact structure that works):
 
-- **MODEL**: The LLM used for orchestration (planning, reflection, response generation). `auto` lets Snowflake select the best available model.
+```yaml
+CREATE OR REPLACE AGENT my_agent
+FROM SPECIFICATION $$
+models:
+  orchestration: auto
+tools:
+  - tool_spec:
+      type: cortex_analyst_text_to_sql
+      name: my_analyst_tool
+      description: "..."
+  - tool_spec:
+      type: cortex_search
+      name: my_search_tool
+      description: "..."
+tool_resources:                          # <-- TOP-LEVEL, not nested per tool
+  my_analyst_tool:
+    semantic_view: DB.SCHEMA.MY_VIEW
+    execution_environment:
+      type: warehouse
+      warehouse: MY_WH
+  my_search_tool:
+    search_service: DB.SCHEMA.MY_SEARCH  # <-- "search_service" not "cortex_search_service"
+instructions:
+  orchestration: |
+    Your orchestration instructions here...
+  response: |
+    Your response formatting instructions here...
+  sample_questions:
+    - question: "Example question 1"
+    - question: "Example question 2"
+$$;
+```
 
-- **TOOLS**: The capabilities the agent can use:
-  - **Cortex Search service** (`marketplace_knowledge_search`): For searching compliance reviews, support tickets, and regulatory filings
-  - **Semantic view** (`MARKETPLACE_ANALYTICS_VIEW`): For generating SQL queries about trade volumes, pricing, and platform metrics
-
-- **INSTRUCTIONS**: System prompt that shapes behavior, tone, and priorities:
-  - Role definition ("You are the HIIVE Marketplace Operations Assistant")
-  - Tool routing guidance ("use analytics tool for volumes/prices/metrics")
-  - Domain context (ROFR, 409A valuations, accredited investors)
-  - Behavioral guidelines (cite sources, flag compliance concerns)
-
-- **SAMPLE_QUESTIONS**: Seed questions shown to users in the UI.
-
-**How the Agent orchestrates**:
-1. **Planning**: Receives user question, decides which tool(s) to use
-2. **Tool execution**: Calls Analyst (generates + runs SQL) or Search (retrieves documents)
-3. **Reflection**: Evaluates tool results — are they sufficient? Need another tool?
-4. **Response**: Synthesizes a natural language answer from tool outputs
+**Critical syntax gotchas**:
+- `tool_resources` is a **top-level** YAML key, not nested under each tool
+- Cortex Search uses `search_service` (not `cortex_search_service`)
+- Analyst tools **require** `execution_environment` with a warehouse
+- `instructions` has sub-keys: `orchestration`, `response`, `sample_questions`
 """)
 
 
-PROMPT_4_2 = """Test our MARKETPLACE_OPS_AGENT by running queries through SNOWFLAKE.CORTEX.AGENT(). Run these four queries one at a time:
+PROMPT_4_2 = """Test our MARKETPLACE_OPS_AGENT by running queries through SNOWFLAKE.CORTEX.DATA_AGENT_RUN(). Run these queries:
 
 1. Structured data query: "What are the top companies by total trade volume and which sectors dominate?"
 2. Unstructured search query: "Have there been any KYC failures or compliance escalations recently? What happened?"
-3. Mixed query (should use both tools): "Which companies with the highest trading volume also have compliance concerns flagged?"
-4. Trend query: "What is the trend in daily active users over the last quarter?"
+3. Trend query: "What is the trend in daily active users over the last quarter?"
 
-For each, show the full response including which tools the agent chose to use."""
+Use this invocation pattern:
+SELECT SNOWFLAKE.CORTEX.DATA_AGENT_RUN(
+  'HIIVE_COCO_HOL.<my_schema>.MARKETPLACE_OPS_AGENT',
+  '{"messages": [{"role": "user", "content": [{"type": "text", "text": "<question>"}]}], "stream": false}'
+) as response;
+
+For each, show the response and note which tools the agent chose to use."""
 
 render_prompt("Prompt 4.2", "Test the Agent", PROMPT_4_2)
 
 render_explanation("What this prompt does", """
-Tests the Agent with four question types that exercise different tool routing:
+Tests the Agent with three question types that exercise different tool routing:
 
 1. **Pure structured** — routes to Cortex Analyst, generates SQL with GROUP BY company/sector for trade volumes
 2. **Pure unstructured** — routes to Cortex Search, retrieves KYC failure and compliance escalation documents
-3. **Mixed** — requires BOTH tools: Analyst for trading volume, Search for compliance flags, then combines
-4. **Trend analysis** — routes to Analyst for time-series query on platform activity metrics
+3. **Trend analysis** — routes to Analyst for time-series query on platform activity metrics
 
-**What to look for**:
-- Which tools did the agent select for each question?
-- Did the mixed query correctly use both tools?
-- Were the trend results presented clearly with time context?
+**Invoking the agent via SQL**:
+```sql
+SELECT SNOWFLAKE.CORTEX.DATA_AGENT_RUN(
+  'DB.SCHEMA.AGENT_NAME',
+  '{"messages": [{"role": "user", "content": [{"type": "text", "text": "your question"}]}], "stream": false}'
+) as response;
+```
 
-**Agent vs. RAG**: The RAG pattern in Session 3 was a single retrieve-then-generate pipeline. The Agent is smarter — it can decide to use Search, then Analyst, then Search again based on the question. It splits complex questions into sub-tasks.
+**What to look for in the response JSON**:
+- `tool_use` entries show which tools the agent selected
+- `tool_result` entries contain the actual data returned
+- The final `text` entry is the agent's synthesized response
+
+> **Tip**: You can also test agents in the Snowsight UI. Go to **AI & ML → Snowflake Intelligence** and select your agent to chat with it interactively.
 """)
 
 
-PROMPT_4_3 = """In your workshop schema in HIIVE_COCO_HOL, enhance our agent by adding a custom tool.
+PROMPT_4_3 = """In my workshop schema in HIIVE_COCO_HOL, enhance our agent by adding a custom tool.
 
-1. Create a UDF that calculates trade risk score in your schema:
+1. Create a UDF that calculates trade risk score:
 
 CREATE OR REPLACE FUNCTION CALCULATE_TRADE_RISK_SCORE(
     company_name VARCHAR,
     trade_value NUMBER,
     shares_pct_of_outstanding NUMBER
 )
-RETURNS VARIANT
+RETURNS OBJECT
 LANGUAGE SQL
 AS
 $$
@@ -106,16 +158,18 @@ $$
             END,
         'recommendation',
             CASE
-                WHEN trade_value > 1000000 AND shares_pct_of_outstanding > 5 THEN 'Large block trade — may trigger ROFR. Require issuer notification and 30-day waiting period. Verify accredited investor status.'
-                WHEN trade_value > 500000 OR shares_pct_of_outstanding > 2 THEN 'Elevated trade — enhanced KYC review recommended. Monitor for wash trading patterns.'
-                ELSE 'Standard trade — proceed with normal settlement workflow.'
+                WHEN trade_value > 1000000 AND shares_pct_of_outstanding > 5 THEN 'Large block trade - may trigger ROFR. Require issuer notification and 30-day waiting period. Verify accredited investor status.'
+                WHEN trade_value > 500000 OR shares_pct_of_outstanding > 2 THEN 'Elevated trade - enhanced KYC review recommended. Monitor for wash trading patterns.'
+                ELSE 'Standard trade - proceed with normal settlement workflow.'
             END
     )
 $$;
 
 2. Test the UDF with sample inputs.
 
-3. Recreate MARKETPLACE_OPS_AGENT to include CALCULATE_TRADE_RISK_SCORE as an additional tool alongside the existing Analyst and Search tools.
+3. Recreate MARKETPLACE_OPS_AGENT to include CALCULATE_TRADE_RISK_SCORE as an additional custom tool alongside the existing Analyst and Search tools. For custom tools in the agent spec:
+   - tool_spec type is "function"
+   - tool_resources for the function needs: function_name, description of parameters
 
 4. Test the enhanced agent with: "What is the risk score for a $2M trade of 8% of Stripe's outstanding shares?"
 
@@ -144,19 +198,28 @@ Extends the Agent with a **custom UDF tool**:
 4. Incorporates the result into its response
 
 **This is the "agentic" pattern**: The Agent doesn't just retrieve data — it takes actions, calls functions, and orchestrates workflows.
+
+> **Note**: Adding custom tools (type: "function") to agents requires the function to be accessible to the agent's execution role. The agent spec references the function by its fully qualified name.
 """)
 
 
 render_key_concepts([
-    {"term": "Cortex Agent", "definition": "A first-class Snowflake object that orchestrates LLMs, Cortex Analyst, Cortex Search, and custom tools to answer complex questions. Supports planning, tool use, reflection, and multi-turn conversations."},
-    {"term": "Tool Routing", "definition": "The Agent's ability to select the appropriate tool for each question. Structured data -> Analyst, unstructured search -> Search, calculations -> custom UDFs. The LLM decides routing based on the question and tool descriptions."},
-    {"term": "Custom Tools", "definition": "SQL UDFs or stored procedures registered as Agent tools. The Agent calls them with extracted parameters. Enables custom business logic, external integrations, and workflow automation."},
-    {"term": "Multi-tool Orchestration", "definition": "When a question requires multiple tools (e.g., 'show me trade volume AND compliance concerns'), the Agent plans a sequence of tool calls, executes them, and synthesizes a combined answer."},
+    {"term": "Cortex Agent", "definition": "A first-class Snowflake object that orchestrates LLMs, Cortex Analyst, Cortex Search, and custom tools to answer complex questions. Created with CREATE AGENT FROM SPECIFICATION using YAML config."},
+    {"term": "Tool Routing", "definition": "The Agent's ability to select the appropriate tool for each question. Structured data -> Analyst, unstructured search -> Search, calculations -> custom UDFs. The orchestration LLM decides routing."},
+    {"term": "tool_resources", "definition": "A TOP-LEVEL YAML key in the agent spec (not nested per tool). Maps tool names to their resources: semantic_view + execution_environment for Analyst, search_service for Search."},
+    {"term": "DATA_AGENT_RUN", "definition": "The SQL function to invoke a Cortex Agent. Takes the agent's fully qualified name and a JSON request body with messages array. Returns a JSON response with tool calls and synthesized answer."},
+])
+
+render_docs_links([
+    {"title": "Cortex Agents", "url": "https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-agent"},
+    {"title": "CREATE AGENT", "url": "https://docs.snowflake.com/en/sql-reference/sql/create-agent"},
+    {"title": "User-Defined Functions (UDFs)", "url": "https://docs.snowflake.com/en/developer-guide/udf/udf-overview"},
+    {"title": "DATA_AGENT_RUN", "url": "https://docs.snowflake.com/en/sql-reference/functions/data_agent_run"},
 ])
 
 render_what_you_built([
     "MARKETPLACE_OPS_AGENT — Cortex Agent with Analyst + Search tools",
-    "Tested structured, unstructured, mixed, and trend queries",
+    "Tested structured, unstructured, and trend queries via DATA_AGENT_RUN",
     "CALCULATE_TRADE_RISK_SCORE UDF as a custom tool",
     "Enhanced agent with three tool types (Analyst + Search + custom)",
 ])

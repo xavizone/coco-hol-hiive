@@ -1,5 +1,5 @@
 import streamlit as st
-from components import render_session_header, render_prompt, render_explanation, render_technologies_used, render_key_concepts, render_what_you_built
+from components import render_session_header, render_prompt, render_explanation, render_technologies_used, render_key_concepts, render_what_you_built, render_docs_links, render_execution_context
 
 render_session_header(6, "Streamlit", "11:05 - 11:10 AM", "5 min", "Operations dashboard with AI chat interface")
 
@@ -8,6 +8,18 @@ render_technologies_used([
     {"name": "Compute Pool", "description": "A managed pool of container nodes that powers SiS apps. Provides CPU/GPU resources, auto-scales, and supports any Python package from pip.", "icon": "memory"},
     {"name": "st.connection(\"snowflake\")", "description": "The Streamlit connection API for Snowflake on container runtime. Returns a connection object with .session() for Snowpark. No credentials needed — inherits the logged-in user's session.", "icon": "terminal"},
 ])
+
+st.markdown("""
+> **Context check:** Verify your session is using `HIIVE_COCO_HOL_ROLE`, `HIIVE_COCO_HOL_WH`, and `HIIVE_COCO_HOL` database with your personal schema. If anything looks off, run:
+> ```sql
+> USE ROLE HIIVE_COCO_HOL_ROLE;
+> USE WAREHOUSE HIIVE_COCO_HOL_WH;
+> USE DATABASE HIIVE_COCO_HOL;
+> USE SCHEMA <YOUR_USERNAME>_OPS;
+> ```
+""")
+
+render_execution_context("cortex_code")
 
 st.markdown("---")
 
@@ -27,14 +39,14 @@ Use the shared compute pool HIIVE_COCO_HOL_COMPUTE_POOL and the pre-created exte
 Create the Streamlit app with these 2 pages:
 
 PAGE 1 - Marketplace Dashboard:
-- KPI cards at the top showing: Total Trade Volume USD (from TRADE_EXECUTIONS), Active Listings (count with status 'active' from LISTINGS), Avg Execution Price (from TRADE_EXECUTIONS), Compliance Clearance Rate (% with status 'cleared' from COMPLIANCE_REVIEWS)
+- KPI cards at the top showing: Total Trade Volume USD (from TRADE_EXECUTIONS), Active Listings (count with status 'active' from LISTINGS), Avg Execution Price (from TRADE_EXECUTIONS), Compliance Approval Rate (% with outcome 'approved' from COMPLIANCE_REVIEWS)
 - A bar chart of trade volume by company (join TRADE_EXECUTIONS to COMPANIES)
 - A line chart showing daily trades over time
 - A table of recent compliance reviews with risk_score color coding
 
 PAGE 2 - Marketplace Intelligence Chat:
 - A chat interface where users can type natural language questions
-- Uses our MARKETPLACE_OPS_AGENT via SNOWFLAKE.CORTEX.AGENT() to answer questions
+- Uses our MARKETPLACE_OPS_AGENT via SNOWFLAKE.CORTEX.DATA_AGENT_RUN() to answer questions
 - Has a sidebar showing summary stats: total trades, active listings, companies tracked
 
 Important:
@@ -78,7 +90,7 @@ volume_df = session.sql("SELECT SUM(trade_value) FROM TRADE_EXECUTIONS").collect
 st.metric("Total Trade Volume", f"${volume_df[0][0]:,.0f}")
 ```
 
-**Page 2 — Chat interface** uses `st.chat_input` and `st.chat_message` with the MARKETPLACE_OPS_AGENT for responses.
+**Page 2 — Chat interface** uses `st.chat_input` and `st.chat_message` with the MARKETPLACE_OPS_AGENT (via `DATA_AGENT_RUN`) for responses.
 
 **Key advantages of SiS**:
 - **No data movement**: App runs inside Snowflake
@@ -134,9 +146,16 @@ render_key_concepts([
     {"term": "Streamlit in Snowflake (SiS)", "definition": "Snowflake's native app framework for Python data apps. Apps run on Snowflake compute, access data via Snowpark, and inherit security model. Deployed as first-class Snowflake objects."},
 ])
 
+render_docs_links([
+    {"title": "Streamlit in Snowflake", "url": "https://docs.snowflake.com/en/developer-guide/streamlit/about-streamlit"},
+    {"title": "Compute Pools", "url": "https://docs.snowflake.com/en/developer-guide/snowpark-container-services/working-with-compute-pool"},
+    {"title": "st.connection for Snowflake", "url": "https://docs.streamlit.io/develop/api-reference/connections/st.connection"},
+    {"title": "Streamlit App Deployment", "url": "https://docs.snowflake.com/en/developer-guide/streamlit/create-streamlit-ui"},
+])
+
 render_what_you_built([
-    "HIIVE_COCO_HOL_COMPUTE_POOL — shared compute pool for container runtime",
-    "<username>_DASHBOARD — 2-page Streamlit app (named dynamically per user)",
+    "<username>_DASHBOARD — 2-page Streamlit app on container runtime (named dynamically per user)",
     "Marketplace Dashboard with KPIs, charts, and compliance table",
-    "AI-powered chat interface connected to MARKETPLACE_OPS_AGENT",
+    "AI-powered chat interface connected to MARKETPLACE_OPS_AGENT via DATA_AGENT_RUN",
+    "Deployed on shared HIIVE_COCO_HOL_COMPUTE_POOL with PyPI access",
 ])

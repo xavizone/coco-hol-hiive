@@ -1,0 +1,13 @@
+[project]
+name = "hiive-marketplace-dashboard"
+version = "1.0.0"
+description = "HIIVE Marketplace Operations Dashboard"
+
+[tool.streamlit]
+main-file = "streamlit_app.py"
+
+[project.dependencies]
+dependencies = [
+    "streamlit[snowflake]>=1.50.0",
+    "plotly",
+]

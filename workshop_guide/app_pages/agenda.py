@@ -13,7 +13,8 @@ AGENDA = [
     ("11:05 - 11:10 AM", "Session 6: Streamlit", "5 min", "6"),
     ("11:10 - 11:25 AM", "Session 7: DMF & Monitoring", "15 min", "7"),
     ("11:25 - 11:45 AM", "Session 8: dbt Projects", "20 min", "8"),
-    ("11:45 - 11:50 AM", ":gray[Wrap-up & Q&A]", None, None),
+    ("11:45 AM - 12:05 PM", "Session 9: dbt Projects (Hands-On)", "20 min", "9"),
+    ("12:05 - 12:10 PM", ":gray[Wrap-up & Q&A]", None, None),
 ]
 
 for time, title, duration, session_num in AGENDA:
@@ -41,9 +42,10 @@ st.markdown("""
 | **Semantic Views** | 1 | MARKETPLACE_ANALYTICS_VIEW with relationships, metrics, and AI instructions |
 | **Cortex Agents** | 1 | Marketplace operations agent with Analyst + Search + custom tools |
 | **Streamlit Apps** | 1 | Operations dashboard with AI chat |
-| **Data Metric Functions** | 6 | System DMFs + custom anomaly detection |
+| **Data Metric Functions** | 8 | 5 system DMFs (NULL_COUNT, ROW_COUNT, FRESHNESS) + 3 custom anomaly detection |
 | **Alerts** | 1 | Trade volume anomaly alert |
-| **dbt Projects** | 1 | Native Snowflake dbt project with staging + mart models |
+| **dbt Projects** | 1 | Native Snowflake dbt project with staging views + mart table |
+| **Snowflake Tasks** | 2 | Task chain: DBT_SCHEDULED_RUN → DBT_SCHEDULED_TEST |
 """)
 
 st.space("small")
@@ -53,5 +55,5 @@ with st.container(border=True):
     st.markdown("""
 :material/location_on: **HIIVE Office**
 
-July 16, 2026 — 10:00 AM to 11:30 AM
+July 16, 2026 — 10:00 AM to 12:10 PM
 """)

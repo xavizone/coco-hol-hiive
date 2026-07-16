@@ -1,5 +1,5 @@
 import streamlit as st
-from components import render_session_header, render_prompt, render_explanation, render_technologies_used, render_key_concepts, render_what_you_built
+from components import render_session_header, render_prompt, render_explanation, render_technologies_used, render_key_concepts, render_what_you_built, render_docs_links, render_execution_context
 
 render_session_header(1, "Data Prep", "10:05 - 10:20 AM", "15 min", "Personal schema created and 10 marketplace tables loaded from shared stage")
 
@@ -22,6 +22,18 @@ Execute everything and confirm what was created."""
 
 render_prompt("Prompt 1.1", "Create Personal Schema & Stage", PROMPT_1_1)
 
+st.markdown("""
+> **Context check:** After running Prompt 1.1, verify your session is using `HIIVE_COCO_HOL_ROLE`, `HIIVE_COCO_HOL_WH`, and `HIIVE_COCO_HOL` database with your personal schema. In **Snowsight**, check the context selector in the top-left of the worksheet. In **Cortex Code (VS Code)**, the active connection is shown in the bottom status bar. If anything looks off, run:
+> ```sql
+> USE ROLE HIIVE_COCO_HOL_ROLE;
+> USE WAREHOUSE HIIVE_COCO_HOL_WH;
+> USE DATABASE HIIVE_COCO_HOL;
+> USE SCHEMA <YOUR_USERNAME>_OPS;
+> ```
+""")
+
+render_execution_context("cortex_code")
+
 render_explanation("What this prompt does", """
 Sets up your personal workspace within the shared `HIIVE_COCO_HOL` database:
 
@@ -30,8 +42,11 @@ USE ROLE HIIVE_COCO_HOL_ROLE;
 USE WAREHOUSE HIIVE_COCO_HOL_WH;
 USE DATABASE HIIVE_COCO_HOL;
 
-CREATE SCHEMA IF NOT EXISTS IDENTIFIER(CURRENT_USER() || '_OPS');
-USE SCHEMA IDENTIFIER(CURRENT_USER() || '_OPS');
+-- Cortex Code resolves CURRENT_USER() and substitutes your username directly
+-- e.g., CREATE SCHEMA IF NOT EXISTS OLEG_OPS;
+SET MY_SCHEMA = CURRENT_USER() || '_OPS';
+CREATE SCHEMA IF NOT EXISTS IDENTIFIER($MY_SCHEMA);
+USE SCHEMA IDENTIFIER($MY_SCHEMA);
 
 CREATE OR REPLACE STAGE DATA
   DIRECTORY = (ENABLE = TRUE)
@@ -44,6 +59,8 @@ COPY FILES INTO @DATA
 **Why a personal schema?** Multiple attendees share the same `HIIVE_COCO_HOL` database. Using CURRENT_USER() to name the schema (e.g., `OLEG_OPS`, `SARAH_OPS`) means everyone works in their own namespace without object collisions — and no manual name substitution needed.
 
 **COPY FILES** copies the 10 CSV files from the admin's shared stage into your personal `DATA` stage so you can load them into your own tables.
+
+> **Note:** Cortex Code will typically resolve `CURRENT_USER()` and substitute your literal username (e.g., `CREATE SCHEMA IF NOT EXISTS OLEG_OPS`). The `IDENTIFIER()` function requires a session variable or literal string — it does not accept inline expressions like `CURRENT_USER() || '_OPS'` directly.
 """)
 
 
@@ -70,9 +87,14 @@ CREATE OR REPLACE FILE FORMAT csv_format
   PARSE_HEADER = TRUE
   FIELD_OPTIONALLY_ENCLOSED_BY = '"';
 
+-- For each table, create with uppercase columns and load:
 CREATE OR REPLACE TABLE COMPANIES
   USING TEMPLATE (
-    SELECT ARRAY_AGG(OBJECT_CONSTRUCT(*))
+    SELECT ARRAY_AGG(OBJECT_CONSTRUCT(
+      'COLUMN_NAME', UPPER("COLUMN_NAME"),
+      'TYPE', "TYPE",
+      'NULLABLE', "NULLABLE"
+    ))
     FROM TABLE(INFER_SCHEMA(
       LOCATION => '@DATA/companies.csv',
       FILE_FORMAT => 'csv_format'
@@ -81,22 +103,25 @@ CREATE OR REPLACE TABLE COMPANIES
 
 COPY INTO COMPANIES
   FROM @DATA/companies.csv
-  FILE_FORMAT = csv_format;
+  FILE_FORMAT = (FORMAT_NAME = 'csv_format')
+  MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE;
 ```
+
+> **Why UPPER() in USING TEMPLATE?** INFER_SCHEMA preserves the CSV header casing (lowercase). Wrapping `COLUMN_NAME` in `UPPER()` ensures table columns are created as uppercase. `MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE` then allows the COPY INTO to match lowercase CSV headers to uppercase table columns.
 
 **The 10 tables**:
 | Table | Rows | Description |
 |-------|------|-------------|
-| COMPANIES | 25 | Pre-IPO companies on the platform (Stripe, SpaceX, etc.) |
-| SHAREHOLDERS | 60 | Sellers with shares to trade |
+| PLATFORM_ACTIVITY | 400 | Daily platform engagement metrics |
+| TRADE_EXECUTIONS | 300 | Completed secondary transactions |
+| USER_SESSIONS | 300 | User session and device data |
 | LISTINGS | 200 | Active and historical share listings |
-| TRADE_EXECUTIONS | 350 | Completed secondary transactions |
 | PRICING_SIGNALS | 150 | Valuation signals and 409A data |
-| PLATFORM_ACTIVITY | 300 | Daily platform engagement metrics |
-| USER_SESSIONS | 200 | User session and device data |
-| COMPLIANCE_REVIEWS | 50 | KYC/AML and accreditation reviews |
-| SUPPORT_TICKETS | 75 | Customer support interactions |
-| REGULATORY_FILINGS | 50 | SEC Form D and other filings |
+| COMPLIANCE_REVIEWS | 40 | KYC/AML and accreditation reviews |
+| SHAREHOLDERS | 25 | Sellers with shares to trade |
+| REGULATORY_FILINGS | 25 | SEC Form D and other filings |
+| SUPPORT_TICKETS | 20 | Customer support interactions |
+| COMPANIES | 15 | Pre-IPO companies on the platform (Stripe, SpaceX, etc.) |
 """)
 
 
@@ -115,7 +140,7 @@ WHERE table_schema = CURRENT_USER() || '_OPS'
 ORDER BY row_count DESC;
 ```
 
-You should see approximately **1,460 total rows** across 10 tables.
+You should see approximately **1,475 total rows** across 10 tables.
 """)
 
 
@@ -126,7 +151,14 @@ render_key_concepts([
     {"term": "File Format", "definition": "A named object specifying how to parse files (CSV delimiters, headers, quoting, compression). Created once and reused across multiple COPY INTO operations."},
 ])
 
+render_docs_links([
+    {"title": "CREATE STAGE", "url": "https://docs.snowflake.com/en/sql-reference/sql/create-stage"},
+    {"title": "COPY INTO <table>", "url": "https://docs.snowflake.com/en/sql-reference/sql/copy-into-table"},
+    {"title": "File Formats", "url": "https://docs.snowflake.com/en/sql-reference/sql/create-file-format"},
+    {"title": "COPY FILES", "url": "https://docs.snowflake.com/en/sql-reference/sql/copy-files"},
+])
+
 render_what_you_built([
     "Personal <username>_OPS schema in HIIVE_COCO_HOL (created dynamically via CURRENT_USER())",
-    "10 marketplace data tables loaded from shared stage (~1,460 total rows)",
+    "10 marketplace data tables loaded from shared stage (~1,475 total rows)",
 ])

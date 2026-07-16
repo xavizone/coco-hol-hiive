@@ -6,9 +6,9 @@ st.markdown("From Reactive Monitoring to Proactive Data Intelligence with Snowfl
 st.space("small")
 
 col1, col2, col3 = st.columns(3)
-col1.metric("Sections", "7", help="Hands-on lab sections")
-col2.metric("Prompts", "17", help="Total prompts across all tools")
-col3.metric("Duration", "90 min", help="Total workshop time")
+col1.metric("Sections", "9", help="Hands-on lab sections across 4 blocks")
+col2.metric("Prompts", "20+", help="Guided prompts plus hands-on CLI steps")
+col3.metric("Duration", "120 min", help="10:00 AM - 12:05 PM")
 
 st.space("medium")
 
@@ -48,7 +48,7 @@ st.markdown("#### What we're building")
 
 with st.container(border=True):
     st.markdown("""
-In 90 minutes, we build a complete AI-powered marketplace intelligence platform:
+In 120 minutes, we build a complete AI-powered marketplace intelligence platform:
 
 **1. Data Foundation** — Load marketplace and compliance data into Snowflake from pre-generated CSV files.
 
@@ -63,6 +63,10 @@ In 90 minutes, we build a complete AI-powered marketplace intelligence platform:
 **6. Operations Dashboard** — Deploy a Streamlit app with live KPIs, charts, and an AI chat interface.
 
 **7. Proactive Monitoring** — Build Data Metric Functions for anomaly detection and automated alerting — filling the gap between dbt runs.
+
+**8. Native dbt Pipelines** — Deploy a dbt project as a first-class Snowflake object and replace GitHub Actions with a Snowflake Task.
+
+**9. dbt Hands-On** — Execute, version, rollback, and schedule dbt projects using SQL and CLI — the full developer workflow.
 """)
 
 st.space("small")
@@ -72,6 +76,7 @@ with st.container(border=True):
     st.markdown("""
 - Your own dev/Sandbox Snowflake account or a Trial Snowflake account with **ACCOUNTADMIN** role [**Snowflake Trial** Account](signup.snowflake.com);
 - **Cortex Code** open in Snowsight and connected to your account
+- **Snowflake CLI** installed (`brew install snowflake-cli`) — required for Sessions 8-9 (dbt deployment)
 - Cross-region inference enabled (for Cortex LLM functions)
 - Admin has pre-configured `HIIVE_COCO_HOL` database, warehouse (`HIIVE_COCO_HOL_WH`), and shared resources
 - Your personal schema will be created automatically using your Snowflake username (e.g., `HIIVE_COCO_HOL.XAVIER_OPS`)

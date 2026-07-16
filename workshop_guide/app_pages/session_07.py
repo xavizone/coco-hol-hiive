@@ -1,5 +1,5 @@
 import streamlit as st
-from components import render_session_header, render_prompt, render_explanation, render_technologies_used, render_key_concepts, render_what_you_built
+from components import render_session_header, render_prompt, render_explanation, render_technologies_used, render_key_concepts, render_what_you_built, render_docs_links, render_execution_context
 
 render_session_header(7, "DMF & Monitoring", "11:10 - 11:25 AM", "15 min", "Data Metric Functions, scheduled monitoring, and alerts for anomaly detection")
 
@@ -21,6 +21,8 @@ Data Metric Functions (DMFs) require **Snowflake Enterprise Edition** or higher.
 
 **Why DMFs matter for HIIVE:** Your current monitoring stack (dbt Elementary + Datadog) is reactive — it catches issues only when dbt runs. DMFs provide continuous, scheduled monitoring that detects anomalies BETWEEN dbt runs. This is the proactive monitoring gap your team identified.
 """)
+
+render_execution_context("cortex_code")
 
 
 PROMPT_7_1 = """Set up Data Metric Functions for continuous monitoring of our critical marketplace tables.
@@ -163,6 +165,14 @@ After running the prompts above, you can view and manage your DMFs directly in S
 - History charts show metric trends over time — useful for spotting gradual drift vs sudden spikes
 """)
 
+render_docs_links([
+    {"title": "Data Metric Functions", "url": "https://docs.snowflake.com/en/user-guide/data-quality-intro"},
+    {"title": "System DMFs", "url": "https://docs.snowflake.com/en/sql-reference/data-metric-functions/system-dmf-reference"},
+    {"title": "CREATE DATA METRIC FUNCTION", "url": "https://docs.snowflake.com/en/sql-reference/sql/create-data-metric-function"},
+    {"title": "DMF Scheduling", "url": "https://docs.snowflake.com/en/user-guide/data-quality-working"},
+    {"title": "Snowflake Alerts", "url": "https://docs.snowflake.com/en/user-guide/alerts"},
+])
+
 render_key_concepts([
     {"term": "Data Metric Function (DMF)", "definition": "A Snowflake UDF-like function specifically designed to measure data quality metrics. Can be system-provided (NULL_COUNT, FRESHNESS, ROW_COUNT, DUPLICATE_COUNT, UNIQUE_COUNT) or custom-built for business logic. DMFs are attached to tables and run on a schedule."},
     {"term": "DMF Scheduling", "definition": "DMFs can run on CRON schedules or TRIGGER_ON_CHANGES. Results are stored in the database's event table for historical analysis, trend detection, and alerting."},
@@ -179,3 +189,92 @@ render_what_you_built([
     "Alert: trade_volume_alert with hourly check and email notification",
     "Historical DMF event analysis queries",
 ])
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Bonus: Real-World DMF Applications
+# ─────────────────────────────────────────────────────────────────────────────
+
+st.markdown("---")
+st.markdown("## :material/lightbulb: Bonus: Real-World DMF Applications")
+
+st.markdown("""
+DMFs are more than a data quality checkbox — they're a **continuous observability layer** that gives different teams real-time visibility into data health without writing pipelines or dashboards.
+""")
+
+with st.expander("**Financial Services & Compliance**", expanded=True):
+    st.markdown("""
+**Real-world examples:**
+- **Transaction monitoring**: A DMF that counts transactions exceeding regulatory thresholds (e.g., $10K AML reporting limits) and alerts compliance teams before end-of-day reporting
+- **Settlement reconciliation**: Compare expected vs actual settlement counts daily — a mismatch of even 1 row could indicate a failed trade
+- **Regulatory filing completeness**: Track whether all required fields are populated before submission deadlines (e.g., SEC filings with NULL beneficial owner = regulatory risk)
+
+**Why it matters:** Manual spot-checks miss issues between review cycles. A DMF running every 5 minutes catches a data gap within minutes of it appearing — not days later when an auditor flags it.
+""")
+
+with st.expander("**Data Engineering Teams**"):
+    st.markdown("""
+**Real-world examples:**
+- **Pipeline freshness SLAs**: FRESHNESS DMF on critical tables ensures upstream pipelines delivered on time. If your marketing attribution table hasn't refreshed in 4 hours, the campaign team is making decisions on stale data.
+- **Schema drift detection**: DUPLICATE_COUNT on primary key columns catches accidental fan-out from a bad JOIN in an upstream model
+- **Volume anomaly detection**: ROW_COUNT compared to historical patterns catches both silent failures (0 new rows = pipeline broke) and data explosions (10x normal = cartesian join upstream)
+- **Cross-system reconciliation**: Custom DMF comparing row counts between a raw ingestion table and its downstream cleaned version — delta > 5% triggers investigation
+
+**Pro tip:** Use `TRIGGER_ON_CHANGES` in production instead of CRON. It only runs when data actually changes, saving compute costs while still catching issues immediately.
+""")
+
+with st.expander("**Analytics & BI Teams**"):
+    st.markdown("""
+**Real-world examples:**
+- **Dashboard data freshness**: Before stakeholders open their morning dashboard, a FRESHNESS DMF ensures the underlying tables were updated overnight. If not, an alert fires and the dashboard shows a "data delayed" banner.
+- **Metric consistency checks**: A custom DMF that validates total revenue in the fact table matches the sum of line items — catches rounding errors or missing records that would show wrong numbers in executive reports
+- **Dimension table integrity**: NULL_COUNT on key dimension attributes (customer segment, region, product category) prevents "Unknown" slices from growing silently in reports
+
+**Why it matters:** BI teams often discover data issues when a VP asks "why does this number look wrong?" DMFs shift that discovery from reactive (embarrassing) to proactive (professional).
+""")
+
+with st.expander("**Product & Operations Teams**"):
+    st.markdown("""
+**Real-world examples:**
+- **User activity monitoring**: A DMF tracking daily active user counts — a sudden 30% drop could indicate a broken login flow, not just "slow week"
+- **Feature adoption tracking**: Count of NULL values in a new feature's tracking column shows whether instrumentation is working correctly
+- **SLA monitoring**: Custom DMF that counts support tickets older than the SLA window (e.g., 24 hours for P1 tickets) — directly ties data quality to operational commitments
+- **Inventory/supply chain**: Track when stock levels in the data warehouse diverge from the source system by more than a threshold — catches sync failures before they cause stockouts
+""")
+
+with st.expander("**Advanced DMF Patterns**"):
+    st.markdown("""
+**Beyond basic checks — patterns that unlock real value:**
+
+| Pattern | How it works | Use case |
+|---------|-------------|----------|
+| **Statistical process control** | Compare metric to rolling mean ± N standard deviations | Detect gradual drift vs sudden breaks |
+| **Cross-table referential integrity** | DMF on table A that queries table B for orphan records | Catch broken foreign keys without constraints |
+| **Temporal gap detection** | Check for missing time intervals in time-series data | Ensure no hours/days are silently dropped |
+| **Distribution shift detection** | Compare value percentiles to historical baselines | Catch upstream schema changes that shift data semantics |
+| **Conditional freshness** | Different freshness thresholds by partition (e.g., region) | "US data must be < 1hr old, APAC < 4hr" |
+| **Cascading alerts** | Alert escalates severity if metric stays anomalous for N consecutive runs | Distinguish transient blips from real incidents |
+
+**Combining DMFs with Snowflake Alerts creates a full observability stack:**
+1. **DMFs** detect the issue (measurement)
+2. **Alerts** notify the right team (routing)
+3. **Event table history** provides context (investigation)
+4. **Dashboards** on DMF results show trends (visibility)
+
+This replaces expensive third-party data observability tools (Monte Carlo, Anomalo, etc.) with native Snowflake capabilities — no additional infrastructure, no data leaving your account, and no separate billing.
+""")
+
+with st.expander("**Who benefits from DMF metrics?**"):
+    st.markdown("""
+| Team | What they monitor | Business impact |
+|------|------------------|-----------------|
+| **Data Engineering** | Pipeline freshness, row counts, schema drift | Catch failures before downstream consumers notice |
+| **Analytics/BI** | Metric consistency, dimension completeness | Prevent wrong numbers in executive dashboards |
+| **Compliance/Legal** | Regulatory field completeness, threshold breaches | Avoid fines and audit findings |
+| **Product** | Feature instrumentation, user activity patterns | Distinguish data bugs from real product issues |
+| **Operations** | SLA adherence, backlog growth, queue depths | Proactive intervention before customers are impacted |
+| **Finance** | Revenue reconciliation, transaction completeness | Accurate books and faster close cycles |
+| **Security** | Access pattern anomalies, unusual query volumes | Early indicator of data exfiltration or misuse |
+
+**The key insight:** DMFs make data quality a **shared responsibility** with **shared visibility**. Instead of data engineers discovering issues in isolation, every team can subscribe to the metrics that matter to them — and trust that the data behind their decisions is continuously validated.
+""")

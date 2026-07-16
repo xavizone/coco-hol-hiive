@@ -1,5 +1,5 @@
 import streamlit as st
-from components import render_session_header, render_explanation, render_technologies_used, render_key_concepts, render_what_you_built
+from components import render_session_header, render_explanation, render_technologies_used, render_key_concepts, render_what_you_built, render_docs_links, render_execution_context
 
 render_session_header(9, "dbt Projects (Hands-On)", "11:45 AM - 12:05 PM", "20 min", "Deploy, execute, version, and schedule a dbt project natively in Snowflake using SQL and CLI")
 
@@ -26,6 +26,8 @@ This session uses **SQL commands and the Snowflake CLI** (not Cortex Code prompt
 """)
 
 st.markdown("---")
+
+st.caption(":material/terminal: Commands prefixed with `snow` require the **Snowflake CLI**. SQL commands can run in **Snowsight** or **Cortex Code**.")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Step 1: Deploy from Git
@@ -306,6 +308,14 @@ render_key_concepts([
     {"term": "dbt show (Preview)", "definition": "Previews model output WITHOUT materializing objects. Returns rows the model would produce. Impossible with dbt run — a key differentiator for development and validation."},
     {"term": "Versioned Deployments", "definition": "Each deploy creates VERSION$N. Rollback = ALTER ... SET DEFAULT_VERSION (instant). No git revert, no CI re-run. Full audit trail with timestamps."},
     {"term": "Task Chains (AFTER)", "definition": "Tasks with AFTER dependencies form execution DAGs. Run → test → notify mirrors CI steps but with Snowflake SLA, native auth, and unified monitoring."},
+])
+
+render_docs_links([
+    {"title": "dbt Projects on Snowflake", "url": "https://docs.snowflake.com/en/developer-guide/dbt/dbt-snowflake"},
+    {"title": "snow dbt CLI Reference", "url": "https://docs.snowflake.com/en/developer-guide/snowflake-cli/dbt/overview"},
+    {"title": "EXECUTE DBT PROJECT", "url": "https://docs.snowflake.com/en/sql-reference/sql/execute-dbt-project"},
+    {"title": "SHOW VERSIONS IN DBT PROJECT", "url": "https://docs.snowflake.com/en/sql-reference/sql/show-versions-dbt-project"},
+    {"title": "Snowflake Tasks & Task Chains", "url": "https://docs.snowflake.com/en/user-guide/tasks-intro"},
 ])
 
 render_what_you_built([

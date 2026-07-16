@@ -103,3 +103,26 @@ def render_what_you_built(items: list[str]):
     st.markdown("##### :material/check_circle: What you built in this session")
     for item in items:
         st.markdown(f"- :green-badge[Done] {item}")
+
+
+def render_docs_links(links: list[dict]):
+    """Render a 'Further Reading' section with documentation links.
+    Each link dict has 'title' and 'url' keys, optionally 'description'.
+    """
+    st.markdown("##### :material/menu_book: Further Reading")
+    for link in links:
+        desc = f" — {link['description']}" if link.get("description") else ""
+        st.markdown(f"- [{link['title']}]({link['url']}){desc}")
+
+
+def render_execution_context(mode: str):
+    """Render an execution context badge.
+    mode: 'cortex_code', 'cli_only', 'snowsight', 'snowsight_or_cli'
+    """
+    badges = {
+        "cortex_code": ":material/extension: All prompts in this session run in **Cortex Code** (Snowsight or VS Code)",
+        "cli_only": ":material/terminal: **CLI Only** — Requires Snowflake CLI (`snow`)",
+        "snowsight": ":material/web: **Snowsight Only**",
+        "snowsight_or_cli": ":material/web: Runs in **Snowsight SQL** or via **Snowflake CLI**",
+    }
+    st.info(badges.get(mode, mode), icon=None)

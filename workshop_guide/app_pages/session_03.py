@@ -1,5 +1,5 @@
 import streamlit as st
-from components import render_session_header, render_prompt, render_explanation, render_technologies_used, render_key_concepts, render_what_you_built
+from components import render_session_header, render_prompt, render_explanation, render_technologies_used, render_key_concepts, render_what_you_built, render_docs_links, render_execution_context
 
 render_session_header(3, "Cortex Search", "10:35 - 10:45 AM", "10 min", "Knowledge base, Cortex Search service, and RAG query pattern")
 
@@ -8,6 +8,18 @@ render_technologies_used([
     {"name": "RAG (Retrieval Augmented Generation)", "description": "A pattern that retrieves relevant documents first, then passes them as context to an LLM for grounded answer generation. Reduces hallucination by anchoring responses in actual data.", "icon": "hub"},
     {"name": "SEARCH_PREVIEW", "description": "SQL function to query a Cortex Search Service. Supports text queries, column selection, filtering, and result limits. Returns JSON with ranked results.", "icon": "preview"},
 ])
+
+st.markdown("""
+> **Context check:** Verify your session is using `HIIVE_COCO_HOL_ROLE`, `HIIVE_COCO_HOL_WH`, and `HIIVE_COCO_HOL` database with your personal schema. If anything looks off, run:
+> ```sql
+> USE ROLE HIIVE_COCO_HOL_ROLE;
+> USE WAREHOUSE HIIVE_COCO_HOL_WH;
+> USE DATABASE HIIVE_COCO_HOL;
+> USE SCHEMA <YOUR_USERNAME>_OPS;
+> ```
+""")
+
+render_execution_context("cortex_code")
 
 
 PROMPT_3_1 = """In your workshop schema in HIIVE_COCO_HOL:
@@ -137,6 +149,8 @@ User Question
 - **Provides citations**: "Cite specific documents by doc_id" enables traceability
 - **Fresh data**: Search service reflects latest data; LLM knowledge is static
 - **Domain-specific**: Your enterprise compliance and regulatory data isn't in the LLM's training set
+
+> **Note on model selection**: The prompt uses `claude-sonnet-4-6`. If this model isn't available in your account, Cortex Code may substitute another available model (e.g., `mistral-large2`, `llama3.1-70b`). The RAG pattern works with any COMPLETE-supported model.
 """)
 
 
@@ -147,8 +161,15 @@ render_key_concepts([
     {"term": "LATERAL FLATTEN + LISTAGG", "definition": "LATERAL FLATTEN expands a JSON array into rows. LISTAGG concatenates row values into a single string. Together, they convert search result arrays into a context string for LLM prompts."},
 ])
 
+render_docs_links([
+    {"title": "Cortex Search", "url": "https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-search/cortex-search-overview"},
+    {"title": "CREATE CORTEX SEARCH SERVICE", "url": "https://docs.snowflake.com/en/sql-reference/sql/create-cortex-search-service"},
+    {"title": "SEARCH_PREVIEW Function", "url": "https://docs.snowflake.com/en/sql-reference/functions/search_preview"},
+    {"title": "RAG with Cortex Search", "url": "https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-search/tutorials/cortex-search-tutorial-1"},
+])
+
 render_what_you_built([
-    "MARKETPLACE_KNOWLEDGE_BASE — unified document table from 3 sources (175 documents)",
+    "MARKETPLACE_KNOWLEDGE_BASE — unified document table from 3 sources (85 documents)",
     "marketplace_knowledge_search — Cortex Search service with hybrid search",
     "4 search queries demonstrating keyword, semantic, and filtered search",
     "Full RAG pipeline: retrieve + augment + generate in a single SQL query",
