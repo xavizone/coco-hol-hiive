@@ -68,7 +68,7 @@ Two major steps: building a unified knowledge base and creating a search service
 """)
 
 
-PROMPT_3_2 = """In your workshop schema in HIIVE_COCO_HOL, query our marketplace_knowledge_search service using SEARCH_PREVIEW with these searches:
+PROMPT_3_2 = """In my workshop schema in HIIVE_COCO_HOL, query our marketplace_knowledge_search service using SEARCH_PREVIEW with these searches:
 
 1. Search: "KYC verification failure" - show top 3 results
 2. Search: "transfer delay settlement" - show top 3 results
