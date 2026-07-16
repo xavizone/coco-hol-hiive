@@ -1,5 +1,5 @@
 import streamlit as st
-from components import render_session_header, render_prompt, render_explanation, render_technologies_used, render_key_concepts, render_what_you_built
+from components import render_session_header, render_prompt, render_explanation, render_technologies_used, render_key_concepts, render_what_you_built, render_docs_links, render_execution_context
 
 render_session_header(6, "Streamlit", "11:05 - 11:10 AM", "5 min", "Operations dashboard with AI chat interface")
 
@@ -134,9 +134,16 @@ render_key_concepts([
     {"term": "Streamlit in Snowflake (SiS)", "definition": "Snowflake's native app framework for Python data apps. Apps run on Snowflake compute, access data via Snowpark, and inherit security model. Deployed as first-class Snowflake objects."},
 ])
 
+render_docs_links([
+    {"title": "Streamlit in Snowflake", "url": "https://docs.snowflake.com/en/developer-guide/streamlit/about-streamlit"},
+    {"title": "Compute Pools", "url": "https://docs.snowflake.com/en/developer-guide/snowpark-container-services/working-with-compute-pool"},
+    {"title": "st.connection for Snowflake", "url": "https://docs.streamlit.io/develop/api-reference/connections/st.connection"},
+    {"title": "Streamlit App Deployment", "url": "https://docs.snowflake.com/en/developer-guide/streamlit/create-streamlit-ui"},
+])
+
 render_what_you_built([
     "HIIVE_COCO_HOL_COMPUTE_POOL — shared compute pool for container runtime",
-    "<username>_DASHBOARD — 2-page Streamlit app (named dynamically per user)",
+    "<YOUR_USERNAME>_DASHBOARD — 2-page Streamlit app (named dynamically per user)",
     "Marketplace Dashboard with KPIs, charts, and compliance table",
     "AI-powered chat interface connected to MARKETPLACE_OPS_AGENT",
 ])
