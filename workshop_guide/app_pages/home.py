@@ -24,13 +24,13 @@ st.space("medium")
 st.markdown("#### How this workshop works")
 
 st.markdown("""
-Each section has **numbered prompts** that you copy and paste into the appropriate tool:
+Each session has **guided prompts** or **step-by-step instructions** that you follow:
 
-- **Cortex Code** — for building infrastructure, creating objects, and writing SQL/Python
-- **Cortex Analyst** — for testing natural language queries against your semantic view
-- **Snowflake CoWork** — for collaborative data exploration and analysis
+- **Cortex Code** (Snowsight) — Paste prompts to build objects, execute SQL, and create AI services (Sessions 1-4, 6-7)
+- **CoWork** (Snowsight) — Explore data collaboratively with natural language (Session 5)
+- **Snowflake CLI** (`snow`) — Deploy and manage dbt projects from the terminal (Sessions 8-9)
 
-All prompts build on each other sequentially — run them in order throughout the session.
+Sessions build on each other sequentially — run them in order.
 """)
 
 st.space("small")
