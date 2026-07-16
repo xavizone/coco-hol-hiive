@@ -1,6 +1,0 @@
-terminal_id,terminal_name,terminal_code,latitude,longitude,max_teu_capacity,num_berths,num_cranes,operator
-T001,Maisonneuve Terminal,MSNV,45.5567,-73.52,450000,4,8,Montreal Gateway Terminals
-T002,Cast Terminal,CAST,45.553,-73.528,380000,3,6,Termont Montreal Inc.
-T003,Viau Terminal,VIAU,45.562,-73.51,320000,3,5,Empire Stevedoring
-T004,Bickerdike Terminal,BICK,45.5,-73.56,200000,2,4,Logistec Corporation
-T005,Racine Terminal,RACN,45.548,-73.535,150000,2,3,Montreal Port Authority

@@ -1,4 +1,13 @@
 import streamlit as st
+from pathlib import Path
+
+_STATIC = Path(__file__).parent.parent / "static"
+
+logo_col1, logo_col2 = st.columns(2)
+with logo_col1:
+    st.image(str(_STATIC / "Hiive_Logo.png"), width=150)
+with logo_col2:
+    st.image(str(_STATIC / "snowflake_full_logo.png"), width=180)
 
 st.title("HIIVE Snowflake CoCo Workshop")
 st.markdown("From Reactive Monitoring to Proactive Data Intelligence with Snowflake")
