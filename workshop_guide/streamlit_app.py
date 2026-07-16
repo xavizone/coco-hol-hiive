@@ -49,6 +49,7 @@ page = st.navigation(
         ],
         "Reference": [
             st.Page("app_pages/reference_coco.py", title="Cortex Code Plugin", icon=":material/extension:"),
+            st.Page("app_pages/admin_setup.py", title="Lab Setup (Admin)", icon=":material/admin_panel_settings:"),
         ],
     },
     position="sidebar",
