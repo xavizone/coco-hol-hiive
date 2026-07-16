@@ -1,0 +1,32 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# THIS FILE IS FOR REFERENCE ONLY — DO NOT DEPLOY
+# It shows what a typical GitHub Actions dbt profiles.yml looks like
+# before migrating to Snowflake-native execution.
+# ─────────────────────────────────────────────────────────────────────────────
+#
+# Compare this to profiles.yml (the native version) to see what changes:
+#   - password / env_var() fields → REMOVED (session auth handles it)
+#   - user field → REMOVED (session identity)
+#   - account uses env_var() → replaced with literal value
+#   - schema uses env_var() → replaced with literal value
+#
+# Migration prompt for Cortex Code:
+#   "Read profiles_github_actions.yml and convert it to a Snowflake-native
+#    profiles.yml by removing all authentication fields. Explain what changed."
+# ─────────────────────────────────────────────────────────────────────────────
+
+default:
+  target: prod
+  outputs:
+    prod:
+      type: snowflake
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('SNOWFLAKE_USER') }}"
+      password: "{{ env_var('SNOWFLAKE_PASSWORD') }}"
+      role: HIIVE_COCO_HOL_ROLE
+      warehouse: HIIVE_COCO_HOL_WH
+      database: HIIVE_COCO_HOL
+      schema: "{{ env_var('DBT_SCHEMA', 'PROD_OPS') }}"
+      threads: 4
+      client_session_keep_alive: true
+      query_tag: "dbt_github_actions"

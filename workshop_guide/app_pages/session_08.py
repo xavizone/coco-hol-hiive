@@ -95,6 +95,10 @@ snow dbt deploy HIIVE_MARKETPLACE \\
 
 **What's different in profiles.yml?** The Snowflake-native version removes all authentication fields (password, private_key, env_var). When running inside Snowflake, the session already has credentials — no external auth needed.
 
+Compare `profiles_github_actions.yml` (included in the project folder as a reference) to `profiles.yml` to see exactly what was stripped out. You can also ask Cortex Code to do the conversion for you:
+
+> *"Read profiles_github_actions.yml and convert it to a Snowflake-native profiles.yml by removing all authentication fields. Explain what changed and why."*
+
 **What `snow dbt deploy` does**: Packages all project files, uploads them to Snowflake, and creates a first-class dbt project object (VERSION$1). The project is now a Snowflake object you can DESCRIBE, ALTER, and EXECUTE — just like a table or view.
 """)
 

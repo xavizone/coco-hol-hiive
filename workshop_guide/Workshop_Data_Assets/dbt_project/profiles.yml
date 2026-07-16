@@ -1,3 +1,6 @@
+# Snowflake-native profiles.yml
+# No password, no user, no env_var() — session auth handles credentials.
+# Compare to profiles_github_actions.yml to see what was removed.
 default:
   target: dev
   outputs:
@@ -7,5 +10,5 @@ default:
       role: HIIVE_COCO_HOL_ROLE
       warehouse: HIIVE_COCO_HOL_WH
       database: HIIVE_COCO_HOL
-      schema: "{{ target.schema }}"
+      schema: XPRADEES_OPS
       threads: 4
