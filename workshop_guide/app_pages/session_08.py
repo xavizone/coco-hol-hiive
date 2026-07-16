@@ -34,7 +34,7 @@ st.caption(":material/terminal: Commands prefixed with `snow` require the **Snow
 # Define shared prompts (identical across both options)
 PROMPT_8_2 = """Run our deployed HIIVE_MARKETPLACE dbt project. I need you to:
 
-1. Execute a full build (models + tests): snow dbt execute -c default --database HIIVE_COCO_HOL --schema <my_schema> HIIVE_MARKETPLACE build
+1. Execute a full build (models + tests): snow dbt execute -c default --database HIIVE_COCO_HOL --schema <YOUR_USERNAME>_OPS HIIVE_MARKETPLACE build
 2. Show me the results — how many models passed, how many tests passed
 3. Query the newly created mart table (MART_COMPANY_PERFORMANCE) to show company metrics
 4. Verify all expected objects exist: STG_TRADES (view), STG_LISTINGS (view), MART_COMPANY_PERFORMANCE (table)
@@ -46,7 +46,7 @@ PROMPT_8_3 = """Now replace our GitHub Actions workflow with a native Snowflake 
 1. Create a Snowflake Task called DBT_HOURLY_BUILD in my schema that:
    - Uses the HIIVE_COCO_HOL_WH warehouse
    - Runs on a CRON schedule every hour (USING CRON 0 * * * * America/Vancouver)
-   - Executes: EXECUTE DBT PROJECT HIIVE_COCO_HOL.<my_schema>.HIIVE_MARKETPLACE ARGS = 'build'
+   - Executes: EXECUTE DBT PROJECT HIIVE_COCO_HOL.<YOUR_USERNAME>_OPS.HIIVE_MARKETPLACE ARGS = 'build'
 2. Resume the task so it starts running
 3. Show me the task details to confirm it's active
 
@@ -54,7 +54,7 @@ Execute everything. This single Task replaces our entire .github/workflows/dbt.y
 
 PROMPT_8_4 = """Show me how to monitor our dbt project execution without leaving Snowflake. I need you to:
 
-1. Show all versions of the deployed project: SHOW VERSIONS IN DBT PROJECT HIIVE_COCO_HOL.<my_schema>.HIIVE_MARKETPLACE
+1. Show all versions of the deployed project: SHOW VERSIONS IN DBT PROJECT HIIVE_COCO_HOL.<YOUR_USERNAME>_OPS.HIIVE_MARKETPLACE
 2. Query the task execution history for our DBT_HOURLY_BUILD task (last 10 runs)
 3. Show me how to check if any dbt tests failed in the most recent run
 4. Describe the dbt project to see its metadata
@@ -71,7 +71,7 @@ with tab_a:
 
 1. Copy the dbt project files from @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES/dbt_project/ into my personal DATA stage
 2. Show me the profiles.yml to confirm it's Snowflake-native (no password, no env_var)
-3. Deploy the project to my schema using: snow dbt deploy HIIVE_MARKETPLACE --source @DATA/dbt_project --database HIIVE_COCO_HOL --schema <my_schema>
+3. Deploy the project to my schema using: snow dbt deploy HIIVE_MARKETPLACE --source @DATA/dbt_project --database HIIVE_COCO_HOL --schema <YOUR_USERNAME>_OPS
 4. Verify the deployment by listing dbt projects in my schema
 
 Execute everything and confirm the project is deployed."""
@@ -90,7 +90,7 @@ COPY FILES INTO @DATA/dbt_project/
 snow dbt deploy HIIVE_MARKETPLACE \\
   --source @DATA/dbt_project \\
   --database HIIVE_COCO_HOL \\
-  --schema <your_schema>
+  --schema <YOUR_USERNAME>_OPS
 ```
 
 **What's different in profiles.yml?** The Snowflake-native version removes all authentication fields (password, private_key, env_var). When running inside Snowflake, the session already has credentials — no external auth needed.
@@ -101,7 +101,7 @@ snow dbt deploy HIIVE_MARKETPLACE \\
     st.info("""
 :material/visibility: **Verify in Snowsight**
 
-Navigate to **Data → Databases → HIIVE_COCO_HOL → <your_schema>**. You should see a **dbt Project** object listed alongside your tables and views. Click it to view:
+Navigate to **Data → Databases → HIIVE_COCO_HOL → <YOUR_USERNAME>_OPS**. You should see a **dbt Project** object listed alongside your tables and views. Click it to view:
 - Project metadata (name, creation time)
 - VERSION$1 (the initial deployment)
 - Source files included in the project
@@ -114,7 +114,7 @@ Runs the deployed dbt project using native Snowflake compute:
 
 ```bash
 snow dbt execute -c default \\
-  --database HIIVE_COCO_HOL --schema <your_schema> \\
+  --database HIIVE_COCO_HOL --schema <YOUR_USERNAME>_OPS \\
   HIIVE_MARKETPLACE build
 ```
 
@@ -151,7 +151,7 @@ CREATE OR REPLACE TASK DBT_HOURLY_BUILD
   WAREHOUSE = HIIVE_COCO_HOL_WH
   SCHEDULE = 'USING CRON 0 * * * * America/Vancouver'
 AS
-  EXECUTE DBT PROJECT HIIVE_COCO_HOL.<your_schema>.HIIVE_MARKETPLACE
+  EXECUTE DBT PROJECT HIIVE_COCO_HOL.<YOUR_USERNAME>_OPS.HIIVE_MARKETPLACE
     ARGS = 'build';
 
 ALTER TASK DBT_HOURLY_BUILD RESUME;
@@ -186,7 +186,7 @@ Shows how to monitor and debug dbt projects without leaving Snowflake:
 
 ```sql
 -- View all deployed versions
-SHOW VERSIONS IN DBT PROJECT HIIVE_COCO_HOL.<your_schema>.HIIVE_MARKETPLACE;
+SHOW VERSIONS IN DBT PROJECT HIIVE_COCO_HOL.<YOUR_USERNAME>_OPS.HIIVE_MARKETPLACE;
 
 -- Check task execution history
 SELECT *
@@ -196,7 +196,7 @@ FROM TABLE(INFORMATION_SCHEMA.TASK_HISTORY(
 ));
 
 -- Describe project metadata
-DESCRIBE DBT PROJECT HIIVE_COCO_HOL.<your_schema>.HIIVE_MARKETPLACE;
+DESCRIBE DBT PROJECT HIIVE_COCO_HOL.<YOUR_USERNAME>_OPS.HIIVE_MARKETPLACE;
 ```
 
 **Versioned deployments**: Each `snow dbt deploy` creates VERSION$1, VERSION$2, etc. If a bad deploy goes out, rollback is one command — no git revert, no waiting for CI to re-run.
@@ -264,7 +264,7 @@ hiive_marketplace:
       type: snowflake
       account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
       database: HIIVE_COCO_HOL
-      schema: <your_schema>
+      schema: <YOUR_USERNAME>_OPS
       # No password, no private_key — session auth handles it
 ```
 
@@ -274,7 +274,7 @@ hiive_marketplace:
     st.info("""
 :material/visibility: **Verify in Snowsight**
 
-Navigate to **Data → Databases → HIIVE_COCO_HOL → <your_schema>**. You should see a **dbt Project** object listed alongside your tables and views. Click it to view:
+Navigate to **Data → Databases → HIIVE_COCO_HOL → <YOUR_USERNAME>_OPS**. You should see a **dbt Project** object listed alongside your tables and views. Click it to view:
 - Project metadata (name, creation time)
 - VERSION$1 (the initial deployment)
 - Source files included in the project
@@ -287,7 +287,7 @@ Runs the deployed dbt project using native Snowflake compute:
 
 ```bash
 snow dbt execute -c default \\
-  --database HIIVE_COCO_HOL --schema <your_schema> \\
+  --database HIIVE_COCO_HOL --schema <YOUR_USERNAME>_OPS \\
   HIIVE_MARKETPLACE build
 ```
 
@@ -324,7 +324,7 @@ CREATE OR REPLACE TASK DBT_HOURLY_BUILD
   WAREHOUSE = HIIVE_COCO_HOL_WH
   SCHEDULE = 'USING CRON 0 * * * * America/Vancouver'
 AS
-  EXECUTE DBT PROJECT HIIVE_COCO_HOL.<your_schema>.HIIVE_MARKETPLACE
+  EXECUTE DBT PROJECT HIIVE_COCO_HOL.<YOUR_USERNAME>_OPS.HIIVE_MARKETPLACE
     ARGS = 'build';
 
 ALTER TASK DBT_HOURLY_BUILD RESUME;
@@ -359,7 +359,7 @@ Shows how to monitor and debug dbt projects without leaving Snowflake:
 
 ```sql
 -- View all deployed versions
-SHOW VERSIONS IN DBT PROJECT HIIVE_COCO_HOL.<your_schema>.HIIVE_MARKETPLACE;
+SHOW VERSIONS IN DBT PROJECT HIIVE_COCO_HOL.<YOUR_USERNAME>_OPS.HIIVE_MARKETPLACE;
 
 -- Check task execution history
 SELECT *
@@ -369,7 +369,7 @@ FROM TABLE(INFORMATION_SCHEMA.TASK_HISTORY(
 ));
 
 -- Describe project metadata
-DESCRIBE DBT PROJECT HIIVE_COCO_HOL.<your_schema>.HIIVE_MARKETPLACE;
+DESCRIBE DBT PROJECT HIIVE_COCO_HOL.<YOUR_USERNAME>_OPS.HIIVE_MARKETPLACE;
 ```
 
 **Versioned deployments**: Each `snow dbt deploy` creates VERSION$1, VERSION$2, etc. If a bad deploy goes out, rollback is one command — no git revert, no waiting for CI to re-run.

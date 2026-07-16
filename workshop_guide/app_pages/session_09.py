@@ -96,7 +96,7 @@ Packages all project files (models, tests, profiles.yml, dbt_project.yml) and cr
 st.info("""
 :material/visibility: **Verify in Snowsight**
 
-Navigate to **Data → Databases → HIIVE_COCO_HOL → <your_schema>**. You should see a **dbt Project** object (HIIVE_MARKETPLACE) listed alongside your tables and views.
+Navigate to **Data → Databases → HIIVE_COCO_HOL → <YOUR_USERNAME>_OPS**. You should see a **dbt Project** object (HIIVE_MARKETPLACE) listed alongside your tables and views.
 
 Click it to view:
 - **Overview**: Project name, creation time, default version

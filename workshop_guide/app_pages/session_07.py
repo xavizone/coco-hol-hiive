@@ -46,7 +46,7 @@ Sets up Snowflake's built-in Data Metric Functions on your most critical tables:
 
 ```sql
 -- Configure where DMF results are stored
-ALTER DATABASE HIIVE_COCO_HOL SET DATA_METRIC_SCHEDULE_EVENT_TABLE = 'HIIVE_COCO_HOL.<username>_OPS.DMF_EVENTS';
+ALTER DATABASE HIIVE_COCO_HOL SET DATA_METRIC_SCHEDULE_EVENT_TABLE = 'HIIVE_COCO_HOL.<YOUR_USERNAME>_OPS.DMF_EVENTS';
 
 -- Apply system DMFs to TRADE_EXECUTIONS
 ALTER TABLE TRADE_EXECUTIONS ADD DATA METRIC FUNCTION SNOWFLAKE.CORE.NULL_COUNT ON (compliance_status);
@@ -153,7 +153,7 @@ After running the prompts above, you can view and manage your DMFs directly in S
 
 1. **Data Quality tab** — Navigate to **Monitoring → Data Quality** in the left sidebar. You'll see all active DMF schedules, recent results, and any anomaly flags across your tables.
 
-2. **Table-level DMF view** — Browse to any table (e.g., `HIIVE_COCO_HOL → <your_schema> → TRADE_EXECUTIONS`), then click the **Data Quality** tab on the table detail page. This shows all DMFs attached to that specific table with their latest metric values and history charts.
+2. **Table-level DMF view** — Browse to any table (e.g., `HIIVE_COCO_HOL → <YOUR_USERNAME>_OPS → TRADE_EXECUTIONS`), then click the **Data Quality** tab on the table detail page. This shows all DMFs attached to that specific table with their latest metric values and history charts.
 
 3. **Alerts monitoring** — Navigate to **Monitoring → Alerts** in the left sidebar to see your `trade_volume_alert`. You can view execution history, check if it has fired, and manually suspend/resume it.
 

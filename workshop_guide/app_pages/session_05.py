@@ -22,7 +22,7 @@ with st.container(border=True):
     st.markdown("""
 In Snowsight, click **CoWork** (or **Snowflake Intelligence**) in the left navigation panel. Start a new conversation.
 
-CoWork provides a chat-based interface that can query your Snowflake data, create charts, and generate insights — no SQL required. It discovers your tables in your personal schema (`HIIVE_COCO_HOL.<username>_OPS`) automatically.
+CoWork provides a chat-based interface that can query your Snowflake data, create charts, and generate insights — no SQL required. It discovers your tables in your personal schema (`HIIVE_COCO_HOL.<YOUR_USERNAME>_OPS`) automatically.
 
 Paste each question below into CoWork one at a time and observe how it generates queries and visualizations.
 
@@ -59,7 +59,7 @@ render_explanation("How CoWork works", """
 - **CoWork**: Analyst tool — explores data, generates visualizations, shares insights
 
 **What CoWork does with these questions**:
-1. Queries your tables automatically (it discovers your `HIIVE_COCO_HOL.<username>_OPS` tables)
+1. Queries your tables automatically (it discovers your `HIIVE_COCO_HOL.<YOUR_USERNAME>_OPS` tables)
 2. Generates appropriate SQL behind the scenes
 3. Creates visualizations (charts, tables) inline
 4. Provides natural language explanations of the results

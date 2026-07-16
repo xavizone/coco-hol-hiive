@@ -101,7 +101,7 @@ PROMPT_4_2 = """Test our MARKETPLACE_OPS_AGENT by running queries through SNOWFL
 
 Use this invocation pattern:
 SELECT SNOWFLAKE.CORTEX.DATA_AGENT_RUN(
-  'HIIVE_COCO_HOL.<my_schema>.MARKETPLACE_OPS_AGENT',
+  'HIIVE_COCO_HOL.<YOUR_USERNAME>_OPS.MARKETPLACE_OPS_AGENT',
   '{"messages": [{"role": "user", "content": [{"type": "text", "text": "<question>"}]}], "stream": false}'
 ) as response;
 

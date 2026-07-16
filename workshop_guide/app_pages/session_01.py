@@ -159,6 +159,6 @@ render_docs_links([
 ])
 
 render_what_you_built([
-    "Personal <username>_OPS schema in HIIVE_COCO_HOL (created dynamically via CURRENT_USER())",
+    "Personal <YOUR_USERNAME>_OPS schema in HIIVE_COCO_HOL (created dynamically via CURRENT_USER())",
     "10 marketplace data tables loaded from shared stage (~1,475 total rows)",
 ])
