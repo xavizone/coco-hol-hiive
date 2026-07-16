@@ -2,34 +2,55 @@ import streamlit as st
 
 st.title("Workshop agenda")
 
-AGENDA = [
-    ("10:00 - 10:05 AM", "Welcome & Overview", None, None),
-    ("10:05 - 10:20 AM", "Session 1: Data Prep", "15 min", "1"),
-    ("10:20 - 10:35 AM", "Session 2: Cortex Analyst & Semantic Views", "15 min", "2"),
-    ("10:35 - 10:45 AM", "Session 3: Cortex Search", "10 min", "3"),
-    ("10:45 - 10:50 AM", ":orange-badge[BREAK]", None, None),
-    ("10:50 - 11:00 AM", "Session 4: Cortex Agents", "10 min", "4"),
-    ("11:00 - 11:05 AM", "Session 5: CoWork", "5 min", "5"),
-    ("11:05 - 11:10 AM", "Session 6: Streamlit", "5 min", "6"),
-    ("11:10 - 11:25 AM", "Session 7: DMF & Monitoring", "15 min", "7"),
-    ("11:25 - 11:45 AM", "Session 8: dbt Projects", "20 min", "8"),
-    ("11:45 AM - 12:05 PM", "Session 9: dbt Projects (Hands-On)", "20 min", "9"),
-    ("12:05 - 12:10 PM", ":gray[Wrap-up & Q&A]", None, None),
-]
+st.markdown("""
+**Target duration: ~90 minutes** — Some labs can be skipped during the live session and completed independently afterward.
+""")
 
-for time, title, duration, session_num in AGENDA:
-    if session_num:
-        col1, col2 = st.columns([1, 4])
-        col1.markdown(f"**{time}**")
-        col2.markdown(f":material/play_circle: **{title}** :gray-badge[{duration}]")
-    elif "BREAK" in title:
-        col1, col2 = st.columns([1, 4])
-        col1.markdown(f"**{time}**")
-        col2.markdown(f"{title}")
-    else:
-        col1, col2 = st.columns([1, 4])
-        col1.markdown(f"**{time}**")
-        col2.markdown(f":gray[{title}]")
+st.markdown("---")
+
+# Block 1
+st.markdown("#### Block 1: Data & Intelligence :gray-badge[~35 min]")
+st.markdown("""
+| Session | Title | Description |
+|---------|-------|-------------|
+| 1 | Data Prep | Personal schema + 10 marketplace tables loaded from shared stage |
+| 2 | Cortex Analyst & Semantic Views | Semantic view with relationships, metrics, and NL queries |
+| 3 | Cortex Search | Knowledge base, search service, and RAG query pattern |
+""")
+
+st.markdown("---")
+
+# Block 2
+st.markdown("#### Block 2: Agents & Apps :gray-badge[~20 min]")
+st.markdown("""
+| Session | Title | Description |
+|---------|-------|-------------|
+| 4 | Cortex Agents | Agent with Analyst + Search + custom UDF tools |
+| 5 | CoWork | Collaborative AI analysis in Snowsight |
+| 6 | Streamlit | Operations dashboard with AI chat interface |
+""")
+
+st.markdown("---")
+
+# Block 3
+st.markdown("#### Block 3: Monitoring & Quality :gray-badge[~15 min]")
+st.markdown("""
+| Session | Title | Description |
+|---------|-------|-------------|
+| 7 | DMF & Monitoring | System + custom DMFs, scheduling, alerts, anomaly detection |
+""")
+
+st.markdown("---")
+
+# Block 4
+st.markdown("#### Block 4: Data Pipelines :gray-badge[~20 min]")
+st.markdown("""
+| Session | Title | Description |
+|---------|-------|-------------|
+| 8 | dbt Projects | Deploy, execute, and schedule a dbt project natively in Snowflake |
+| 9 | dbt Projects (Hands-On) | Version, rollback, task chains — full CLI + SQL workflow |
+""")
+st.caption("Sessions 8-9 can be combined or done independently after the workshop.")
 
 st.space("medium")
 
@@ -55,5 +76,5 @@ with st.container(border=True):
     st.markdown("""
 :material/location_on: **HIIVE Office**
 
-July 16, 2026 — 10:00 AM to 12:10 PM
+July 16, 2026 — Starting at 10:00 AM (~90 min)
 """)

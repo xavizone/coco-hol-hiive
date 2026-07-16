@@ -71,6 +71,10 @@ GRANT CREATE SCHEMA ON DATABASE HIIVE_COCO_HOL TO ROLE HIIVE_COCO_HOL_ROLE;
 GRANT USAGE ON WAREHOUSE HIIVE_COCO_HOL_WH TO ROLE HIIVE_COCO_HOL_ROLE;
 GRANT DATABASE ROLE SNOWFLAKE.CORTEX_USER TO ROLE HIIVE_COCO_HOL_ROLE;
 
+-- 5a. Grant DMF privileges (Session 7: Data Metric Functions)
+GRANT DATABASE ROLE SNOWFLAKE.DATA_METRIC_USER TO ROLE HIIVE_COCO_HOL_ROLE;
+GRANT EXECUTE DATA METRIC FUNCTION ON ACCOUNT TO ROLE HIIVE_COCO_HOL_ROLE;
+
 -- 5b. Session 8 (dbt Projects): Upload dbt project files to shared stage
 -- Download from: https://github.com/xavizone/coco-hol-hiive/tree/main/workshop_guide/dbt_project
 -- PUT file://./dbt_project/dbt_project.yml @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES/dbt_project/;
@@ -130,7 +134,7 @@ ALTER ACCOUNT SET CORTEX_ENABLED_CROSS_REGION = 'ANY_REGION';
 | What | How | Why |
 |------|-----|-----|
 | **Laptop with Chrome** | Bring it charged | We'll work in Snowsight (browser) for the full lab |
-| **Snowflake CLI** | `brew install snowflake-cli` (Mac) | Needed for VS Code CoCo plugin connectivity |
+| **Snowflake CLI** | `brew install snowflake-cli` (Mac) | Required for Sessions 8-9 (dbt deploy/execute) and VS Code CoCo plugin |
 | **VS Code + Snowflake extension** | Extensions marketplace → search "Snowflake" → Install | Optional for the lab, but recommended for daily workflow after |
 | **Claude Code CLI** | You already have this — run `claude update` to ensure latest | We'll reference CoCo as a complement to your existing Claude workflow |
 
@@ -165,14 +169,14 @@ ALTER ACCOUNT SET CORTEX_ENABLED_CROSS_REGION = 'ANY_REGION';
 
 ---
 
-## What we'll cover (~110 min)
+## What we'll cover (~90 min)
 
 | Block | Sessions | What you'll build |
 |-------|----------|-------------------|
 | **Block 1: Data & Intelligence** | Data Prep, Semantic Views, Cortex Search | 10 tables, a semantic view, a search service, and a RAG pipeline |
 | **Block 2: Agents & Apps** | Cortex Agents, CoWork, Streamlit | An AI agent, collaborative analysis, and a live dashboard |
 | **Block 3: Monitoring** | DMFs & Alerts | Anomaly detection DMFs and alerting (demo if Standard Edition) |
-| **Block 4: Data Pipelines** | dbt Projects | Native Snowflake dbt project — deploy, execute, and schedule (replaces GitHub Actions) |
+| **Block 4: Data Pipelines** | dbt Projects, dbt Hands-On | Native Snowflake dbt project — deploy, execute, version, rollback, and schedule with task chains (replaces GitHub Actions) |
 
 ### Edition note
 

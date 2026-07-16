@@ -8,7 +8,7 @@ st.space("small")
 col1, col2, col3 = st.columns(3)
 col1.metric("Sections", "9", help="Hands-on lab sections across 4 blocks")
 col2.metric("Prompts", "20+", help="Guided prompts plus hands-on CLI steps")
-col3.metric("Duration", "120 min", help="10:00 AM - 12:05 PM")
+col3.metric("Duration", "~90 min", help="Core workshop time (additional labs can be completed after)")
 
 st.space("medium")
 
@@ -48,7 +48,7 @@ st.markdown("#### What we're building")
 
 with st.container(border=True):
     st.markdown("""
-In 120 minutes, we build a complete AI-powered marketplace intelligence platform:
+In ~90 minutes, we build a complete AI-powered marketplace intelligence platform:
 
 **1. Data Foundation** — Load marketplace and compliance data into Snowflake from pre-generated CSV files.
 
