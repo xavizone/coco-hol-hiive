@@ -42,7 +42,7 @@ with st.container(border=True):
 **1a. Clone the project** (or use your existing dbt project):
 """)
     st.code("""git clone https://github.com/xavizone/coco-hol-hiive.git
-cd coco-hol-hiive/workshop_guide/dbt_project""", language="bash")
+cd coco-hol-hiive/workshop_guide/Workshop_Data_Assets/dbt_project""", language="bash")
 
     st.markdown("""
 **1b. Review and update `profiles.yml`** for Snowflake-native execution:
@@ -80,7 +80,7 @@ cd coco-hol-hiive/workshop_guide/dbt_project""", language="bash")
 
     st.markdown("**1c. Deploy** to your schema:")
     st.code("""snow dbt deploy HIIVE_MARKETPLACE \\
-  --source ./workshop_guide/dbt_project \\
+  --source ./workshop_guide/Workshop_Data_Assets/dbt_project \\
   --database HIIVE_COCO_HOL \\
   --schema <YOUR_USERNAME>_OPS""", language="bash")
 
@@ -197,7 +197,7 @@ with st.container(border=True):
 **4a. Make a change** to a model locally (e.g., add `avg_commission` column to the mart), then re-deploy:
 """)
     st.code("""snow dbt deploy HIIVE_MARKETPLACE \\
-  --source ./workshop_guide/dbt_project \\
+  --source ./workshop_guide/Workshop_Data_Assets/dbt_project \\
   --database HIIVE_COCO_HOL \\
   --schema <YOUR_USERNAME>_OPS""", language="bash")
     st.caption("Same command as before — Snowflake automatically creates VERSION$2.")

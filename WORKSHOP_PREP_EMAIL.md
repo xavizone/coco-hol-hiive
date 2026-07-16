@@ -23,12 +23,12 @@ Run these **before July 16** so the environment is ready when attendees arrive.
 ### Setup Script (run as ACCOUNTADMIN)
 
 **Step 0 — Download the workshop data files:**
-> https://github.com/xavizone/coco-hol-hiive/tree/main/workshop_guide/data
+> https://github.com/xavizone/coco-hol-hiive/tree/main/workshop_guide/Workshop_Data_Assets/csv_data
 >
 > Download all 10 CSV files from the link above. You'll upload them to the shared stage in step 4.
 
 **Step 0b — Download the dbt project files (for Session 8, Option A):**
-> https://github.com/xavizone/coco-hol-hiive/tree/main/workshop_guide/dbt_project
+> https://github.com/xavizone/coco-hol-hiive/tree/main/workshop_guide/Workshop_Data_Assets/dbt_project
 >
 > Download the entire `dbt_project/` folder. You'll upload it to the shared stage in step 5b. (Skip this if you plan to use Option B where Cortex Code generates the project live.)
 
@@ -49,7 +49,7 @@ CREATE OR REPLACE STAGE HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES
   ENCRYPTION = (TYPE = 'SNOWFLAKE_SSE');
 
 -- 4. Upload the 10 CSV files to the stage
--- Download from: https://github.com/xavizone/coco-hol-hiive/tree/main/workshop_guide/data
+-- Download from: https://github.com/xavizone/coco-hol-hiive/tree/main/workshop_guide/Workshop_Data_Assets/csv_data
 -- Upload via Snowsight UI (Horizon Catalog → browse to stage) or SnowSQL:
 -- PUT file://./companies.csv @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES;
 -- PUT file://./shareholders.csv @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES;
@@ -76,7 +76,7 @@ GRANT DATABASE ROLE SNOWFLAKE.DATA_METRIC_USER TO ROLE HIIVE_COCO_HOL_ROLE;
 GRANT EXECUTE DATA METRIC FUNCTION ON ACCOUNT TO ROLE HIIVE_COCO_HOL_ROLE;
 
 -- 5b. Session 8 (dbt Projects): Upload dbt project files to shared stage
--- Download from: https://github.com/xavizone/coco-hol-hiive/tree/main/workshop_guide/dbt_project
+-- Download from: https://github.com/xavizone/coco-hol-hiive/tree/main/workshop_guide/Workshop_Data_Assets/dbt_project
 -- PUT file://./dbt_project/dbt_project.yml @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES/dbt_project/;
 -- PUT file://./dbt_project/profiles.yml @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES/dbt_project/;
 -- PUT file://./dbt_project/models/schema.yml @HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES/dbt_project/models/;

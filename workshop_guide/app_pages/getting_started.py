@@ -34,7 +34,7 @@ CREATE DATABASE IF NOT EXISTS HIIVE_COCO_HOL;
 CREATE SCHEMA IF NOT EXISTS HIIVE_COCO_HOL.SHARED_DATA;
 
 -- 4. Create a shared stage and upload the 10 CSV files
--- Download CSVs to a local folder from: https://github.com/xavizone/coco-hol-hiive/tree/main/workshop_guide/data
+-- Download CSVs to a local folder from: https://github.com/xavizone/coco-hol-hiive/tree/main/workshop_guide/Workshop_Data_Assets/csv_data
 CREATE OR REPLACE STAGE HIIVE_COCO_HOL.SHARED_DATA.WORKSHOP_FILES
   DIRECTORY = (ENABLE = TRUE)
   ENCRYPTION = (TYPE = 'SNOWFLAKE_SSE');
@@ -107,7 +107,7 @@ ALTER ACCOUNT SET CORTEX_ENABLED_CROSS_REGION = 'ANY_REGION';""", language="sql"
     st.markdown("""
 **Notes:**
 - Replace `<each_attendee>` with each workshop participant's username (one GRANT per user)
-- Download the 10 CSV files from: [github.com/xavizone/coco-hol-hiive/tree/main/workshop_guide/data](https://github.com/xavizone/coco-hol-hiive/tree/main/workshop_guide/data)
+- Download the 10 CSV files from: [github.com/xavizone/coco-hol-hiive/tree/main/workshop_guide/Workshop_Data_Assets/csv_data](https://github.com/xavizone/coco-hol-hiive/tree/main/workshop_guide/Workshop_Data_Assets/csv_data)
 - Cross-region inference allows Cortex LLM requests to route to the nearest available region
 """)
 
@@ -124,7 +124,7 @@ with st.container(border=True):
 **For Option A (Pre-built from Stage):** Upload the workshop dbt project files to the shared stage so attendees can copy and deploy them. This step is **not required** if you plan to use Option B (where Cortex Code generates the dbt project live).
 
 Download the `dbt_project/` folder from:
-[github.com/xavizone/coco-hol-hiive/tree/main/workshop_guide/dbt_project](https://github.com/xavizone/coco-hol-hiive/tree/main/workshop_guide/dbt_project)
+[github.com/xavizone/coco-hol-hiive/tree/main/workshop_guide/Workshop_Data_Assets/dbt_project](https://github.com/xavizone/coco-hol-hiive/tree/main/workshop_guide/Workshop_Data_Assets/dbt_project)
 """)
 
     st.code("""-- Upload dbt project files to shared stage (preserving folder structure)
